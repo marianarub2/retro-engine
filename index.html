@@ -9,203 +9,218 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
-  --bg: #0e0f11; --surface: #16181c; --surface2: #1e2127; --border: #2a2d35;
-  --accent: #b8f04a; --accent-dim: #8abf2e; --accent-bg: rgba(184,240,74,0.07);
-  --text: #f0f0ee; --muted: #6b6f7a; --danger: #ff6b6b; --warning: #f5a623;
-  --radius: 10px; --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bg:#0e0f11;--surface:#16181c;--surface2:#1e2127;--border:#2a2d35;
+  --accent:#b8f04a;--accent-dim:#8abf2e;--accent-bg:rgba(184,240,74,0.07);
+  --text:#f0f0ee;--muted:#6b6f7a;--danger:#ff6b6b;--warning:#f5a623;
+  --radius:10px;--font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
 
-.screen { display: none; min-height: 100vh; flex-direction: column; }
-.screen.active { display: flex; }
-
-/* ── CONFIG ── */
-#config-screen { align-items: center; justify-content: center; padding: 2rem; }
-.config-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 480px; }
-.logo { font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: .5rem; }
-.config-card h1 { font-size: 28px; font-weight: 700; margin-bottom: .25rem; }
-.config-card h1 span { color: var(--accent); }
-.config-card p { color: var(--muted); font-size: 14px; margin-bottom: 2rem; line-height: 1.5; }
-label { display: block; font-size: 12px; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
-input[type=text], input[type=password] {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text); font-size: 14px;
-  padding: 10px 14px; outline: none; margin-bottom: 1.25rem; transition: border-color .2s;
+/* CONFIG */
+#config-screen{align-items:center;justify-content:flex-start;padding:2rem;overflow-y:auto;}
+.config-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:600px;margin:auto;}
+.logo{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;}
+.config-card h1{font-size:26px;font-weight:700;margin-bottom:.25rem;}
+.config-card h1 span{color:var(--accent);}
+.config-card>p{color:var(--muted);font-size:14px;margin-bottom:1.75rem;line-height:1.5;}
+label{display:block;font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+input[type=text],input[type=password],input[type=number]{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:14px;
+  padding:9px 13px;outline:none;margin-bottom:1rem;transition:border-color .2s;
 }
-input:focus { border-color: var(--accent); }
-.btn-primary { width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 14px; border: none; border-radius: var(--radius); padding: 12px; cursor: pointer; transition: background .2s; }
-.btn-primary:hover { background: var(--accent-dim); }
-.error-msg { color: var(--danger); font-size: 13px; margin-bottom: 1rem; display: none; }
-.config-hint { margin-top: 1.5rem; padding: 12px 14px; background: var(--surface2); border-radius: var(--radius); font-size: 12px; color: var(--muted); line-height: 1.6; }
-.config-hint a { color: var(--accent); text-decoration: none; }
+input:focus{border-color:var(--accent);}
+.section-divider{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+.sprint-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;}
+.sprint-block .sprint-label{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:.75rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1rem;}
+.grid-2 .field-group{display:flex;flex-direction:column;}
+.grid-2 label{margin-bottom:4px;}
+.grid-2 input{margin-bottom:0;}
+.btn-primary{width:100%;background:var(--accent);color:#0e0f11;font-weight:700;font-size:14px;border:none;border-radius:var(--radius);padding:12px;cursor:pointer;transition:background .2s;margin-top:.5rem;}
+.btn-primary:hover{background:var(--accent-dim);}
+.error-msg{color:var(--danger);font-size:13px;margin-bottom:1rem;display:none;}
+.config-hint{margin-top:1.25rem;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--muted);line-height:1.6;}
+.config-hint a{color:var(--accent);text-decoration:none;}
 
-/* ── FACILITATOR ── */
-#facilitator-screen { padding: 1.5rem; padding-bottom: 20px; }
-.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.top-bar .brand { font-size: 13px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
-.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: var(--radius); padding: 6px 12px; font-size: 13px; cursor: pointer; transition: all .2s; }
-.btn-ghost:hover { border-color: var(--text); color: var(--text); }
+/* FACILITATOR */
+#facilitator-screen{padding:1.5rem;}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.top-bar .brand{font-size:13px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);padding:6px 12px;font-size:13px;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--text);color:var(--text);}
 
-/* ── PHASE VOTING ── */
-#phase-voting { display: none; }
-#phase-voting.active { display: block; }
-.voting-layout { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items: start; }
-.section-title { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
-.topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
-.topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: border-color .2s; }
-.topic-card.leading { border-color: var(--accent); background: var(--accent-bg); }
-.topic-card .t-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.topic-card .t-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
-.vote-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.vote-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
-.vote-count { font-size: 12px; color: var(--muted); margin-top: 6px; }
+/* VOTING PHASE */
+#phase-voting{display:none;}
+#phase-voting.active{display:block;}
+.voting-layout{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start;}
+.section-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.topic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:all .2s;cursor:pointer;}
+.topic-card:hover{border-color:var(--muted);}
+.topic-card.leading{border-color:var(--accent);background:var(--accent-bg);}
+.topic-card.confirmed{border-color:var(--accent);background:var(--accent-bg);box-shadow:0 0 0 2px var(--accent);}
+.topic-card .t-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+.topic-card .t-desc{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+.vote-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.vote-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease;width:0%;}
+.vote-count{font-size:12px;color:var(--muted);margin-top:6px;}
+.side-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;}
+.side-panel h3{font-size:14px;font-weight:600;margin-bottom:.25rem;}
+.side-panel>p{font-size:12px;color:var(--muted);margin-bottom:1.25rem;}
+#qr-code{display:flex;justify-content:center;margin-bottom:1.25rem;}
+.link-box{font-size:11px;color:var(--muted);word-break:break-all;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+.voter-count{background:var(--surface2);border-radius:var(--radius);padding:10px;font-size:13px;color:var(--muted);margin-bottom:1rem;text-align:center;}
+.voter-count span{color:var(--accent);font-weight:700;font-size:18px;}
+.btn-accent{background:var(--accent);color:#0e0f11;font-weight:700;font-size:14px;border:none;border-radius:var(--radius);padding:10px 16px;cursor:pointer;transition:background .2s;}
+.btn-accent:hover{background:var(--accent-dim);}
+.btn-accent:disabled{opacity:.35;cursor:not-allowed;}
+.btn-accent.full{width:100%;padding:12px;}
+.btn-copy{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px;font-size:13px;cursor:pointer;margin-bottom:10px;transition:all .2s;}
+.btn-copy:hover{border-color:var(--accent);color:var(--accent);}
+.confirm-topic-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:1rem;}
+.confirm-topic-box .ct-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.confirm-topic-box .ct-winner{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px;}
+.confirm-topic-box .ct-sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
 
-.side-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
-.side-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: .25rem; }
-.side-panel p { font-size: 12px; color: var(--muted); margin-bottom: 1.25rem; }
-#qr-code { display: flex; justify-content: center; margin-bottom: 1.25rem; }
-.link-box { font-size: 11px; color: var(--muted); word-break: break-all; background: var(--surface2); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
-.voter-count { background: var(--surface2); border-radius: var(--radius); padding: 10px; font-size: 13px; color: var(--muted); margin-bottom: 1rem; text-align: center; }
-.voter-count span { color: var(--accent); font-weight: 700; font-size: 18px; }
-.btn-accent { background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 14px; border: none; border-radius: var(--radius); padding: 10px 16px; cursor: pointer; transition: background .2s; }
-.btn-accent:hover { background: var(--accent-dim); }
-.btn-accent:disabled { opacity: .35; cursor: not-allowed; }
-.btn-accent.full { width: 100%; padding: 12px; }
-.btn-copy { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 8px; font-size: 13px; cursor: pointer; margin-bottom: 10px; transition: all .2s; }
-.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+/* RETRO PHASE */
+#phase-retro{display:none;}
+#phase-retro.active{display:block;}
+.retro-header{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.topic-badge{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--accent);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--accent);}
+.retro-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.25rem;}
+.step-pill{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 8px;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;}
+.step-pill.active{background:var(--accent);color:#0e0f11;font-weight:700;border-color:var(--accent);}
+.step-pill.done{border-color:var(--accent-dim);color:var(--accent-dim);}
+.retro-layout{display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start;}
+.step-content{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;}
+.step-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+.step-header h2{font-size:20px;font-weight:700;}
+.timer-badge{background:var(--surface2);border-radius:var(--radius);padding:6px 12px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent);cursor:pointer;border:1px solid var(--border);transition:all .2s;}
+.timer-badge.running{border-color:var(--accent);}
+.timer-badge.expired{color:var(--danger);border-color:var(--danger);}
+.questions-list{list-style:none;margin-bottom:1.25rem;}
+.questions-list li{padding:10px 14px;background:var(--surface2);border-radius:var(--radius);margin-bottom:8px;font-size:14px;line-height:1.5;color:var(--muted);border-left:3px solid var(--border);}
+.questions-list li.hl{border-left-color:var(--accent);color:var(--text);}
+.ideas-board{display:flex;flex-direction:column;gap:8px;min-height:60px;}
+.idea-card{display:flex;align-items:flex-start;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+.idea-card.top-voted{border-color:var(--accent);background:var(--accent-bg);}
+.idea-text{flex:1;font-size:13px;line-height:1.5;}
+.vote-btn{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--muted);white-space:nowrap;}
+.empty-board{text-align:center;padding:2rem 0;color:var(--muted);font-size:13px;}
 
-/* ── PHASE RETRO ── */
-#phase-retro { display: none; }
-#phase-retro.active { display: block; }
-.retro-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.topic-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--accent); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--accent); }
-.retro-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1.25rem; }
-.step-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 6px 8px; text-align: center; font-size: 11px; color: var(--muted); cursor: pointer; transition: all .2s; }
-.step-pill.active { background: var(--accent); color: #0e0f11; font-weight: 700; border-color: var(--accent); }
-.step-pill.done { border-color: var(--accent-dim); color: var(--accent-dim); }
+/* SPRINT DATA FIELDS (step datos) */
+.sprint-data-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:1.25rem;}
+.sprint-data-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;}
+.sprint-data-cell .sdc-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.sprint-data-cell input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:18px;font-weight:700;padding:4px 0;outline:none;transition:border-color .2s;}
+.sprint-data-cell input:focus{border-bottom-color:var(--accent);}
+.sprint-data-cell .sdc-note{font-size:11px;color:var(--muted);margin-top:4px;}
+.prev-sprints{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;}
+.prev-sprint-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;}
+.prev-sprint-row .psr-name{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.prev-sprint-row .psr-data{display:flex;gap:1rem;flex-wrap:wrap;}
+.prev-sprint-row .psr-item{font-size:12px;color:var(--muted);}
+.prev-sprint-row .psr-item span{color:var(--text);font-weight:600;}
 
-.retro-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; align-items: start; }
-.step-content { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; }
-.step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-.step-header h2 { font-size: 20px; font-weight: 700; }
-.timer-badge { background: var(--surface2); border-radius: var(--radius); padding: 6px 12px; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); cursor: pointer; border: 1px solid var(--border); transition: all .2s; }
-.timer-badge.running { border-color: var(--accent); }
-.timer-badge.expired { color: var(--danger); border-color: var(--danger); }
+/* ACTION ITEMS */
+.action-item-row{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;}
+.action-item-row.top-voted{border-color:var(--accent);background:var(--accent-bg);}
+.action-rank{font-size:12px;color:var(--accent);font-weight:700;min-width:20px;}
+.action-text{flex:1;font-size:13px;}
+.action-owner-tag{font-size:12px;color:var(--muted);}
+.btn-row{display:flex;gap:10px;margin-top:1.25rem;}
+.btn-secondary{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:14px;border-radius:var(--radius);padding:10px;cursor:pointer;transition:border-color .2s;}
+.btn-secondary:hover{border-color:var(--text);}
+.btn-next{flex:2;}
 
-/* ideas / cards */
-.questions-list { list-style: none; margin-bottom: 1.25rem; }
-.questions-list li { padding: 10px 14px; background: var(--surface2); border-radius: var(--radius); margin-bottom: 8px; font-size: 14px; line-height: 1.5; color: var(--muted); border-left: 3px solid var(--border); }
-.questions-list li.hl { border-left-color: var(--accent); color: var(--text); }
+/* PHASE PANEL */
+.phase-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;}
+.phase-panel h4{font-size:13px;font-weight:600;margin-bottom:.25rem;}
+.phase-panel>p{font-size:12px;color:var(--muted);margin-bottom:1rem;line-height:1.5;}
+.phase-status{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:var(--radius);padding:10px 12px;margin-bottom:1rem;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.phase-status span{font-size:12px;color:var(--muted);}
+.phase-status strong{color:var(--accent);}
 
-.ideas-board { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
-.idea-card {
-  display: flex; align-items: flex-start; gap: 10px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px 12px;
-  animation: fadeIn .3s ease;
-}
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-.idea-card.top-voted { border-color: var(--accent); background: var(--accent-bg); }
-.idea-text { flex: 1; font-size: 13px; line-height: 1.5; }
-.vote-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--muted); cursor: default; white-space: nowrap; }
-.empty-board { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 13px; }
+/* SUMMARY */
+#phase-summary{display:none;}
+#phase-summary.active{display:block;}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:1.25rem;}
+.summary-card h3{font-size:16px;font-weight:600;margin-bottom:1rem;}
+.summary-section{margin-bottom:1rem;}
+.summary-section .slabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.summary-section p{font-size:14px;line-height:1.6;white-space:pre-wrap;}
 
-/* action items */
-.action-item-row { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; }
-.action-item-row.top-voted { border-color: var(--accent); background: var(--accent-bg); }
-.action-rank { font-size: 12px; color: var(--accent); font-weight: 700; min-width: 20px; }
-.action-text { flex: 1; font-size: 13px; }
-.action-owner { font-size: 12px; color: var(--muted); }
+/* PARTICIPANT */
+#participant-screen{align-items:center;justify-content:center;padding:1.5rem;min-height:100vh;}
+.participant-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:420px;}
+.brand-small{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1.5rem;}
+.p-topic-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem;}
+.p-topic{display:flex;align-items:center;gap:12px;background:var(--surface2);border:2px solid transparent;border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all .15s;}
+.p-topic:hover{border-color:var(--border);}
+.p-topic.selected{border-color:var(--accent);background:var(--accent-bg);}
+.p-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.p-topic.selected .p-check{background:var(--accent);border-color:var(--accent);}
+.p-topic.selected .p-check::after{content:'';display:block;width:6px;height:6px;border-radius:50%;background:#0e0f11;}
+.p-topic .t-name{font-size:14px;font-weight:600;}
+.p-topic .t-desc{font-size:12px;color:var(--muted);}
+.btn-vote{width:100%;background:var(--accent);color:#0e0f11;font-weight:700;font-size:15px;border:none;border-radius:var(--radius);padding:14px;cursor:pointer;transition:background .2s,opacity .2s;}
+.btn-vote:disabled{opacity:.35;cursor:not-allowed;}
+.btn-vote:not(:disabled):hover{background:var(--accent-dim);}
+.p-step-title{font-size:18px;font-weight:700;margin-bottom:.25rem;}
+.p-step-sub{font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5;}
+.p-question{background:var(--surface2);border-left:3px solid var(--accent);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:1.25rem;line-height:1.5;}
+.p-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;padding:12px 14px;resize:vertical;min-height:90px;outline:none;font-family:var(--font);line-height:1.6;transition:border-color .2s;margin-bottom:1rem;}
+.p-textarea:focus{border-color:var(--accent);}
+.ideas-sent{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;}
+.idea-sent{background:var(--surface2);border-radius:var(--radius);padding:8px 12px;font-size:13px;color:var(--muted);border-left:3px solid var(--accent-dim);}
+.vote-idea-card{background:var(--surface2);border:2px solid transparent;border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+.vote-idea-card:hover{border-color:var(--border);}
+.vote-idea-card.voted{border-color:var(--accent);background:var(--accent-bg);}
+.vote-idea-card .vi-text{font-size:13px;line-height:1.5;margin-bottom:6px;}
+.vote-idea-card .vi-foot{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.vi-check{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);display:inline-block;vertical-align:middle;transition:all .15s;}
+.vote-idea-card.voted .vi-check{background:var(--accent);border-color:var(--accent);}
+.votes-left{font-size:12px;color:var(--muted);margin-bottom:1rem;}
+.votes-left strong{color:var(--accent);}
+.waiting-msg{text-align:center;padding:2rem 0;}
+.waiting-icon{font-size:40px;margin-bottom:1rem;}
+.waiting-msg h3{font-size:16px;font-weight:700;margin-bottom:.5rem;}
+.waiting-msg p{font-size:13px;color:var(--muted);}
+.pulse-dot{display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 1.5s infinite;margin-right:6px;vertical-align:middle;}
+/* participant data view */
+.p-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem;}
+.p-data-cell{background:var(--surface2);border-radius:var(--radius);padding:12px;}
+.p-data-cell .pdc-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.p-data-cell .pdc-value{font-size:20px;font-weight:700;color:var(--text);}
+.p-data-cell .pdc-note{font-size:11px;color:var(--muted);margin-top:2px;}
+.p-prev-row{background:var(--surface2);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;}
+.p-prev-row .ppr-name{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+.p-prev-row .ppr-items{display:flex;gap:1rem;flex-wrap:wrap;}
+.p-prev-row .ppr-item{font-size:12px;color:var(--muted);}
+.p-prev-row .ppr-item span{color:var(--text);font-weight:600;}
 
-.btn-row { display: flex; gap: 10px; margin-top: 1.25rem; }
-.btn-secondary { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 14px; border-radius: var(--radius); padding: 10px; cursor: pointer; transition: border-color .2s; }
-.btn-secondary:hover { border-color: var(--text); }
-.btn-next { flex: 2; }
-
-/* phase panel (right column) */
-.phase-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; }
-.phase-panel h4 { font-size: 13px; font-weight: 600; margin-bottom: .25rem; }
-.phase-panel p { font-size: 12px; color: var(--muted); margin-bottom: 1rem; line-height: 1.5; }
-.phase-status { display: flex; align-items: center; gap: 8px; background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 1rem; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; flex-shrink: 0; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-.phase-status span { font-size: 12px; color: var(--muted); }
-.phase-status strong { color: var(--accent); }
-
-/* ── PHASE SUMMARY ── */
-#phase-summary { display: none; }
-#phase-summary.active { display: block; }
-.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; margin-bottom: 1.25rem; }
-.summary-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 1rem; }
-.summary-section { margin-bottom: 1rem; }
-.summary-section .slabel { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-.summary-section p { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-
-/* ── PARTICIPANT SCREEN ── */
-#participant-screen { align-items: center; justify-content: center; padding: 1.5rem; min-height: 100vh; }
-.participant-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; }
-.brand-small { font-size: 11px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.5rem; }
-
-/* voting topics (participant) */
-.p-topic-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
-.p-topic { display: flex; align-items: center; gap: 12px; background: var(--surface2); border: 2px solid transparent; border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: all .15s; }
-.p-topic:hover { border-color: var(--border); }
-.p-topic.selected { border-color: var(--accent); background: var(--accent-bg); }
-.p-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-.p-topic.selected .p-check { background: var(--accent); border-color: var(--accent); }
-.p-topic.selected .p-check::after { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: #0e0f11; }
-.p-topic .t-name { font-size: 14px; font-weight: 600; }
-.p-topic .t-desc { font-size: 12px; color: var(--muted); }
-.btn-vote { width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 15px; border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: background .2s, opacity .2s; }
-.btn-vote:disabled { opacity: .35; cursor: not-allowed; }
-.btn-vote:not(:disabled):hover { background: var(--accent-dim); }
-
-/* idea input (participant) */
-.p-step-title { font-size: 18px; font-weight: 700; margin-bottom: .25rem; }
-.p-step-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
-.p-question { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; margin-bottom: 1.25rem; line-height: 1.5; }
-.p-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 14px; padding: 12px 14px; resize: vertical; min-height: 90px; outline: none; font-family: var(--font); line-height: 1.6; transition: border-color .2s; margin-bottom: 1rem; }
-.p-textarea:focus { border-color: var(--accent); }
-.ideas-sent { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
-.idea-sent { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--accent-dim); }
-
-/* voting ideas (participant) */
-.vote-idea-card { background: var(--surface2); border: 2px solid transparent; border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
-.vote-idea-card:hover { border-color: var(--border); }
-.vote-idea-card.voted { border-color: var(--accent); background: var(--accent-bg); }
-.vote-idea-card .vi-text { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
-.vote-idea-card .vi-foot { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.vi-check { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border); display: inline-block; vertical-align: middle; transition: all .15s; }
-.vote-idea-card.voted .vi-check { background: var(--accent); border-color: var(--accent); }
-.votes-left { font-size: 12px; color: var(--muted); margin-bottom: 1rem; }
-.votes-left strong { color: var(--accent); }
-
-/* waiting / done states */
-.waiting-msg { text-align: center; padding: 2rem 0; }
-.waiting-icon { font-size: 40px; margin-bottom: 1rem; }
-.waiting-msg h3 { font-size: 16px; font-weight: 700; margin-bottom: .5rem; }
-.waiting-msg p { font-size: 13px; color: var(--muted); }
-.pulse-dot { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; margin-right: 6px; vertical-align: middle; }
-
-/* history */
-#history-screen { padding: 1.5rem; }
-.history-list { display: flex; flex-direction: column; gap: 10px; }
-.history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .2s; }
-.history-item:hover { border-color: var(--muted); }
-.hi-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 11px; color: var(--accent); margin-bottom: 4px; }
-.empty-state { text-align: center; padding: 4rem 0; color: var(--muted); font-size: 14px; }
-
-/* modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; align-items: center; justify-content: center; padding: 1.5rem; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 440px; max-height: 80vh; overflow-y: auto; }
-.modal h3 { font-size: 18px; font-weight: 700; margin-bottom: .5rem; }
-
-@media (max-width: 700px) {
-  .voting-layout, .retro-layout { grid-template-columns: 1fr; }
-  .retro-steps { grid-template-columns: repeat(5, 1fr); }
-  .step-pill { font-size: 10px; padding: 5px 4px; }
+/* HISTORY */
+#history-screen{padding:1.5rem;}
+.history-list{display:flex;flex-direction:column;gap:10px;}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s;}
+.history-item:hover{border-color:var(--muted);}
+.hi-badge{display:inline-block;background:var(--surface2);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;font-size:11px;color:var(--accent);margin-bottom:4px;}
+.empty-state{text-align:center;padding:4rem 0;color:var(--muted);font-size:14px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:1.5rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:.5rem;}
+@media(max-width:700px){
+  .voting-layout,.retro-layout{grid-template-columns:1fr;}
+  .step-pill{font-size:10px;padding:5px 4px;}
+  .grid-2{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -216,18 +231,66 @@ input:focus { border-color: var(--accent); }
   <div class="config-card">
     <div class="logo">Retro Engine</div>
     <h1>Configurar <span>sesión</span></h1>
-    <p>Conectá tu Firebase para habilitar la colaboración en tiempo real del equipo.</p>
+    <p>Completá los datos del sprint y la conexión a Firebase antes de empezar.</p>
     <div id="config-error" class="error-msg"></div>
+
+    <div class="section-divider">Conexión Firebase</div>
     <label>Firebase API Key</label>
     <input type="password" id="fb-apikey" placeholder="AIzaSy..." />
     <label>Firebase Database URL</label>
     <input type="text" id="fb-dburl" placeholder="https://tu-proyecto.firebaseio.com" />
-    <label>Nombre del sprint / sesión</label>
+
+    <div class="section-divider">Sprint actual</div>
+    <label>Nombre del sprint</label>
     <input type="text" id="sprint-name" placeholder="Sprint 42 — Q2 2026" />
-    <button class="btn-primary" onclick="initApp()">Conectar y empezar →</button>
-    <div class="config-hint">
-      Gratis en <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Realtime Database → Modo test.
+    <div class="sprint-block">
+      <div class="sprint-label" id="current-sprint-label">Sprint actual</div>
+      <div class="grid-2">
+        <div class="field-group"><label>Velocity comprometida</label><input type="number" id="s0-vel-est" placeholder="0" /></div>
+        <div class="field-group"><label>Velocity promedio (real)</label><input type="number" id="s0-vel" placeholder="0" /></div>
+        <div class="field-group"><label>Carry over (items)</label><input type="number" id="s0-carry" placeholder="0" /></div>
+        <div class="field-group"><label>Lead time (días)</label><input type="number" id="s0-leadtime" placeholder="0" step="0.1" /></div>
+        <div class="field-group"><label>Cantidad de errores</label><input type="number" id="s0-bugs" placeholder="0" /></div>
+        <div class="field-group"><label>Cantidad de incidentes</label><input type="number" id="s0-incidents" placeholder="0" /></div>
+        <div class="field-group"><label>Rechazos por QA</label><input type="number" id="s0-qa" placeholder="0" /></div>
+        <div class="field-group"><label>Efectividad del sprint (%)</label><input type="number" id="s0-efectividad" placeholder="0" /></div>
+      </div>
     </div>
+
+    <div class="section-divider">Sprints anteriores <span style="font-weight:400;color:var(--muted)">(opcional)</span></div>
+    <div class="sprint-block">
+      <div class="sprint-label">Sprint anterior (−1)</div>
+      <label>Nombre</label>
+      <input type="text" id="s1-name" placeholder="Sprint 41" />
+      <div class="grid-2">
+        <div class="field-group"><label>Vel. comprometida</label><input type="number" id="s1-vel-est" placeholder="0" /></div>
+        <div class="field-group"><label>Vel. promedio (real)</label><input type="number" id="s1-vel" placeholder="0" /></div>
+        <div class="field-group"><label>Carry over</label><input type="number" id="s1-carry" placeholder="0" /></div>
+        <div class="field-group"><label>Lead time (días)</label><input type="number" id="s1-leadtime" placeholder="0" /></div>
+        <div class="field-group"><label>Errores</label><input type="number" id="s1-bugs" placeholder="0" /></div>
+        <div class="field-group"><label>Incidentes</label><input type="number" id="s1-incidents" placeholder="0" /></div>
+        <div class="field-group"><label>Rechazos QA</label><input type="number" id="s1-qa" placeholder="0" /></div>
+        <div class="field-group"><label>Efectividad (%)</label><input type="number" id="s1-efectividad" placeholder="0" /></div>
+      </div>
+    </div>
+    <div class="sprint-block">
+      <div class="sprint-label">Sprint anterior (−2)</div>
+      <label>Nombre</label>
+      <input type="text" id="s2-name" placeholder="Sprint 40" />
+      <div class="grid-2">
+        <div class="field-group"><label>Vel. comprometida</label><input type="number" id="s2-vel-est" placeholder="0" /></div>
+        <div class="field-group"><label>Vel. promedio (real)</label><input type="number" id="s2-vel" placeholder="0" /></div>
+        <div class="field-group"><label>Carry over</label><input type="number" id="s2-carry" placeholder="0" /></div>
+        <div class="field-group"><label>Lead time (días)</label><input type="number" id="s2-leadtime" placeholder="0" /></div>
+        <div class="field-group"><label>Errores</label><input type="number" id="s2-bugs" placeholder="0" /></div>
+        <div class="field-group"><label>Incidentes</label><input type="number" id="s2-incidents" placeholder="0" /></div>
+        <div class="field-group"><label>Rechazos QA</label><input type="number" id="s2-qa" placeholder="0" /></div>
+        <div class="field-group"><label>Efectividad (%)</label><input type="number" id="s2-efectividad" placeholder="0" /></div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="initApp()">Conectar y empezar →</button>
+    <div class="config-hint">¿Primera vez? Gratis en <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Realtime Database → Modo test.</div>
   </div>
 </div>
 
@@ -240,26 +303,32 @@ input:focus { border-color: var(--accent); }
       <button class="btn-ghost" onclick="showHistory()">Historial</button>
     </div>
 
-    <!-- VOTING PHASE -->
+    <!-- VOTING -->
     <div id="phase-voting" class="active">
-      <p class="section-title">Votación del tema</p>
+      <p class="section-title">Paso 1 — Votación del tema</p>
       <div class="voting-layout">
         <div>
           <div class="topic-grid" id="topic-grid"></div>
         </div>
         <div class="side-panel">
-          <h3>Compartí el acceso</h3>
-          <p>El equipo vota y participa desde sus celuares durante toda la retro</p>
+          <h3>Acceso del equipo</h3>
+          <p>Compartí el link o QR para que el equipo vote desde sus celuares</p>
           <div id="qr-code"></div>
           <div class="link-box" id="voter-link-box">—</div>
           <button class="btn-copy" id="btn-copy" onclick="copyLink()">📋 Copiar link</button>
           <div class="voter-count"><span id="voter-count-num">0</span> votos recibidos</div>
+          <div class="confirm-topic-box" id="confirm-box" style="display:none">
+            <div class="ct-label">Tema más votado</div>
+            <div class="ct-winner" id="ct-winner-name">—</div>
+            <div class="ct-sub">¿Lo confirmás o elegís otro?</div>
+            <div id="ct-alt-topics" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+          </div>
           <button class="btn-accent full" id="btn-start" onclick="startRetro()" disabled>Iniciar retrospectiva →</button>
         </div>
       </div>
     </div>
 
-    <!-- RETRO PHASE -->
+    <!-- RETRO -->
     <div id="phase-retro">
       <div class="retro-header">
         <div>
@@ -276,7 +345,7 @@ input:focus { border-color: var(--accent); }
         <div class="step-content" id="step-content"></div>
         <div class="phase-panel" id="phase-panel">
           <h4>Estado del equipo</h4>
-          <p>El equipo participa desde sus dispositivos</p>
+          <p>Participantes activos en esta sesión</p>
           <div class="phase-status">
             <div class="status-dot"></div>
             <span><strong id="live-count">0</strong> participantes activos</span>
@@ -286,7 +355,7 @@ input:focus { border-color: var(--accent); }
       </div>
     </div>
 
-    <!-- SUMMARY PHASE -->
+    <!-- SUMMARY -->
     <div id="phase-summary">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
         <div>
@@ -333,679 +402,1061 @@ input:focus { border-color: var(--accent); }
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
-const TOPICS = [
-  { id:'delays',    name:'Delays',             desc:'Bloqueos y demoras del sprint',        icon:'⏱' },
-  { id:'metricas',  name:'Métricas',            desc:'Velocity, burndown, tendencias',       icon:'📊' },
-  { id:'cliente',   name:'Pedidos del cliente', desc:'Feedback y solicitudes externas',      icon:'💬' },
-  { id:'calidad',   name:'Calidad',             desc:'Bugs, deuda técnica, testing',         icon:'🔍' },
-  { id:'ciclos',    name:'Ciclos de trabajo',   desc:'Flujo, cuellos de botella, WIP',       icon:'🔄' },
-  { id:'acuerdos',  name:'Acuerdos de equipo',  desc:'Normas, compromisos, team agreements', icon:'🤝' },
-  { id:'carryover', name:'Carry over',          desc:'Tareas no cerradas, arrastre',         icon:'↩' },
-  { id:'energia',   name:'Energía del equipo',  desc:'Motivación, clima, comunicación',      icon:'⚡' },
-  { id:'deuda',     name:'Deuda técnica',       desc:'Refactors pendientes, arquitectura',   icon:'🔧' },
-  { id:'discovery', name:'Discovery',           desc:'Ideas, experimentos, backlog',         icon:'💡' },
+// ── DATA ──────────────────────────────────────
+const TOPICS=[
+  {id:'delays',   name:'Delays',            desc:'Bloqueos y demoras del sprint',       icon:'⏱'},
+  {id:'metricas', name:'Métricas',           desc:'Velocity, burndown, tendencias',      icon:'📊'},
+  {id:'cliente',  name:'Pedidos del cliente',desc:'Feedback y solicitudes externas',     icon:'💬'},
+  {id:'calidad',  name:'Calidad',            desc:'Bugs, deuda técnica, testing',        icon:'🔍'},
+  {id:'ciclos',   name:'Ciclos de trabajo',  desc:'Flujo, cuellos de botella, WIP',      icon:'🔄'},
+  {id:'acuerdos', name:'Acuerdos de equipo', desc:'Normas, compromisos, team agreements',icon:'🤝'},
+  {id:'carryover',name:'Carry over',         desc:'Tareas no cerradas, arrastre',        icon:'↩'},
+  {id:'energia',  name:'Energía del equipo', desc:'Motivación, clima, comunicación',     icon:'⚡'},
+  {id:'deuda',    name:'Deuda técnica',      desc:'Refactors pendientes, arquitectura',  icon:'🔧'},
+  {id:'discovery',name:'Discovery',          desc:'Ideas, experimentos, backlog',        icon:'💡'},
 ];
-
-const STEPS = [
-  { id:'checkin',  name:'Check-in',    mins:3,  maxVotes:1 },
-  { id:'datos',    name:'Datos',       mins:5,  maxVotes:1 },
-  { id:'explora',  name:'Exploración', mins:15, maxVotes:3 },
-  { id:'insights', name:'Insights',    mins:5,  maxVotes:2 },
-  { id:'acciones', name:'Acciones',    mins:10, maxVotes:2 },
+const STEPS=[
+  {id:'checkin', name:'Check-in',   mins:3, maxVotes:0},
+  {id:'datos',   name:'Datos',      mins:5, maxVotes:0},
+  {id:'explora', name:'Exploración',mins:15,maxVotes:3},
+  {id:'insights',name:'Insights',   mins:5, maxVotes:2},
+  {id:'acciones',name:'Acciones',   mins:10,maxVotes:2},
 ];
-
-const STEP_PROMPTS = {
-  checkin:  { title:'Check-in', sub:'¿Con una palabra, cómo llegás a esta retro?', questions:['¿Cómo llegás a esta retro (una palabra)?','¿Hay algo que querés dejar afuera antes de empezar?'] },
-  datos:    { title:'Datos del sprint', sub:'Compartí un dato o número relevante del sprint', questions:['¿Cuántos puntos completamos?','¿Cuánto carry over hubo?','¿Bugs o incidents en prod?','¿Algún dato que te llamó la atención?'] },
-  explora:  { title:'Exploración', sub:'Aportá tus ideas sobre el tema del sprint' },
-  insights: { title:'Insights', sub:'¿Cuál es el aprendizaje más importante del sprint?' },
-  acciones: { title:'Acciones', sub:'¿Qué acción concreta proponés para el próximo sprint? Agregá quién podría ser responsable.' },
+const TOPIC_QUESTIONS={
+  delays:   [
+    '¿Qué fue lo que más te frenó a vos o al equipo este sprint?',
+    '¿Cuándo apareció ese bloqueo — al inicio, en el medio, al cierre? ¿Pudimos haberlo anticipado?',
+    '¿Qué cambiaría vos específicamente para que no se repita?',
+  ],
+  metricas: [
+    '¿Qué número del sprint te llamó más la atención — para bien o para mal?',
+    '¿Creés que ese número refleja la realidad de cómo trabajamos, o hay algo que no estamos midiendo?',
+    '¿Qué acción concreta cambiaría esa métrica en el próximo sprint?',
+  ],
+  cliente:  [
+    '¿Qué pedido o feedback del cliente te generó más fricción o sorpresa este sprint?',
+    '¿Sentís que entendemos bien lo que el cliente realmente necesita, o estamos adivinando?',
+    '¿Qué haríamos diferente para estar más alineados con el cliente desde el inicio?',
+  ],
+  calidad:  [
+    '¿Qué problema de calidad te pesó más este sprint — un bug, un rechazo QA, algo que salió mal?',
+    '¿En qué momento del proceso se podría haber detectado antes?',
+    '¿Qué acuerdo o práctica concreta mejoraría la calidad del próximo sprint?',
+  ],
+  ciclos:   [
+    '¿Dónde se atascó el trabajo más tiempo este sprint — en análisis, desarrollo, revisión, deploy?',
+    '¿Tuviste que esperar algo o a alguien para avanzar? ¿Qué impacto tuvo eso?',
+    '¿Qué cambio en el flujo de trabajo reduciría ese tiempo de espera?',
+  ],
+  acuerdos: [
+    '¿Qué acuerdo de equipo se cumplió bien este sprint y cuál no tanto?',
+    '¿Hay algún acuerdo que ya no tiene sentido o que deberíamos actualizar?',
+    '¿Qué acuerdo nuevo propondrías para mejorar cómo trabajamos juntos?',
+  ],
+  carryover:[
+    '¿Qué tarea arrastraste o viste arrastrar este sprint? ¿Por qué no cerró?',
+    '¿Fue un problema de estimación, de bloqueo o de foco del equipo?',
+    '¿Qué harías diferente al planificar para evitar ese carry over?',
+  ],
+  energia:  [
+    '¿Con qué nivel de energía cerrás este sprint — del 1 al 5? ¿Qué lo explica?',
+    '¿Hubo algo este sprint que te sacó energía o motivación? ¿Y algo que te la sumó?',
+    '¿Qué necesitaría el equipo para estar en su mejor versión el próximo sprint?',
+  ],
+  deuda:    [
+    '¿Qué deuda técnica te generó más fricción o riesgo este sprint?',
+    '¿Tenemos visibilidad real de cuánta deuda acumulamos, o trabajamos "a ciegas"?',
+    '¿Qué refactor o mejora priorizarías primero si tuviéramos tiempo dedicado?',
+  ],
+  discovery:[
+    '¿Qué idea o aprendizaje del sprint sentís que merece explorarse más?',
+    '¿Hay alguna hipótesis sobre el producto o los usuarios que nunca llegamos a validar?',
+    '¿Qué experimento pequeño propondrías para el próximo sprint?',
+  ],
 };
 
-const TOPIC_QUESTIONS = {
-  delays:    ['¿Qué bloqueó más al equipo esta semana?','¿Era previsible? ¿Teníamos señales?','¿Qué cambio concreto puede reducir este bloqueo?','¿Dependencias externas que debemos gestionar?'],
-  metricas:  ['¿Cómo cerró el velocity vs. estimación?','¿Qué explica la diferencia?','¿Hay alguna métrica que nos está mintiendo?','¿Qué métrica nueva agregaríamos?'],
-  cliente:   ['¿Qué pedido del cliente nos tomó más por sorpresa?','¿Estamos alineados en expectativas?','¿Qué feedback recurrente estamos ignorando?','¿Cómo mejoramos el canal de comunicación?'],
-  calidad:   ['¿Qué llegó a prod que no debería?','¿Dónde falló la definición de listo?','¿Qué tipo de bug se repite?','¿Dónde necesitamos más testing?'],
-  ciclos:    ['¿Dónde se atasca el trabajo antes de "en progreso"?','¿Hay tareas que estuvieron días sin moverse?','¿El WIP fue razonable?','¿Qué cambiamos en el flujo del próximo sprint?'],
-  acuerdos:  ['¿Qué acuerdo de equipo rompimos o ignoramos?','¿Sigue siendo válido ese acuerdo hoy?','¿Necesitamos crear un acuerdo nuevo?','¿Cómo hacemos los acuerdos más visibles?'],
-  carryover: ['¿Qué tareas arrastramos y por qué no cerraron?','¿Era un problema de tamaño, bloqueo o foco?','¿Cómo mejoramos la estimación para evitarlo?','¿El carry over fue una excepción o una tendencia?'],
-  energia:   ['¿Cómo está la energía del equipo ahora mismo?','¿Hay algo que drena motivación?','¿Hubo algún momento de orgullo del sprint?','¿Qué necesita el equipo para estar en su mejor versión?'],
-  deuda:     ['¿Qué deuda técnica nos frenó este sprint?','¿Tenemos visibilidad de toda la deuda?','¿Qué refactor tiene más impacto ahora?','¿Cómo hacemos espacio para atenderla?'],
-  discovery: ['¿Qué idea del sprint merece explorarse?','¿Hay hipótesis que nunca validamos?','¿El backlog refleja lo que el usuario necesita?','¿Qué experimento haríamos si tuviéramos un día libre?'],
-};
+// ── STATE ─────────────────────────────────────
+let db,sessionKey,sprintName,selectedTopic;
+let currentStep=0,timerInterval=null,timerSecs=0;
+let isParticipant=false,participantId=null;
+let retroData={};
+let sprintData={};  // datos cargados en config
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let db, sessionKey, sprintName, selectedTopic;
-let currentStep = 0;
-let timerInterval = null, timerSecs = 0;
-let isParticipant = false;
-let participantId = null;
-let retroData = {};
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-function initApp() {
-  const apiKey = document.getElementById('fb-apikey').value.trim();
-  const dbUrl  = document.getElementById('fb-dburl').value.trim();
-  sprintName   = document.getElementById('sprint-name').value.trim() || 'Sprint';
-  if (!apiKey || !dbUrl) { showCfgError('Completá todos los campos.'); return; }
-  try {
-    if (firebase.apps.length) firebase.app().delete().then(() => doInit(apiKey, dbUrl));
-    else doInit(apiKey, dbUrl);
-  } catch(e) { showCfgError('Error: ' + e.message); }
+// ── INIT ──────────────────────────────────────
+function initApp(){
+  const apiKey=document.getElementById('fb-apikey').value.trim();
+  const dbUrl =document.getElementById('fb-dburl').value.trim();
+  sprintName  =document.getElementById('sprint-name').value.trim()||'Sprint';
+  if(!apiKey||!dbUrl){showCfgError('Completá Firebase API Key y Database URL.');return;}
+  // Recopilar datos del sprint
+  sprintData={
+    current:{
+      name:        sprintName,
+      velEst:      v('s0-vel-est'),  vel:        v('s0-vel'),
+      carry:       v('s0-carry'),    leadtime:   v('s0-leadtime'),
+      bugs:        v('s0-bugs'),     incidents:  v('s0-incidents'),
+      qa:          v('s0-qa'),       efectividad:v('s0-efectividad'),
+    },
+    prev1: document.getElementById('s1-name').value.trim() ? {
+      name:        document.getElementById('s1-name').value.trim(),
+      velEst:      v('s1-vel-est'),  vel:        v('s1-vel'),
+      carry:       v('s1-carry'),    leadtime:   v('s1-leadtime'),
+      bugs:        v('s1-bugs'),     incidents:  v('s1-incidents'),
+      qa:          v('s1-qa'),       efectividad:v('s1-efectividad'),
+    } : null,
+    prev2: document.getElementById('s2-name').value.trim() ? {
+      name:        document.getElementById('s2-name').value.trim(),
+      velEst:      v('s2-vel-est'),  vel:        v('s2-vel'),
+      carry:       v('s2-carry'),    leadtime:   v('s2-leadtime'),
+      bugs:        v('s2-bugs'),     incidents:  v('s2-incidents'),
+      qa:          v('s2-qa'),       efectividad:v('s2-efectividad'),
+    } : null,
+  };
+  // Guardar en localStorage
+  localStorage.setItem('retro_fb_config',JSON.stringify({apiKey,dbUrl}));
+  localStorage.setItem('retro_sprint_data',JSON.stringify(sprintData));
+  try{
+    if(firebase.apps.length) firebase.app().delete().then(()=>doInit(apiKey,dbUrl));
+    else doInit(apiKey,dbUrl);
+  }catch(e){showCfgError('Error: '+e.message);}
 }
+function v(id){return document.getElementById(id)?document.getElementById(id).value.trim()||'—':'—';}
 
-function doInit(apiKey, dbUrl) {
-  try {
-    firebase.initializeApp({ apiKey, databaseURL: dbUrl });
-    db = firebase.database();
-    sessionKey = 'retro_' + Date.now();
-    localStorage.setItem('retro_fb_config', JSON.stringify({ apiKey, dbUrl }));
-    db.ref(sessionKey + '/_test').set(Date.now())
-      .then(() => db.ref(sessionKey + '/_test').once('value'))
-      .then(snap => {
-        if (!snap.exists()) throw { msg: 'No se pudo leer. Revisá el modo prueba en Firebase.' };
+function doInit(apiKey,dbUrl){
+  try{
+    firebase.initializeApp({apiKey,databaseURL:dbUrl});
+    db=firebase.database();
+    sessionKey='retro_'+Date.now();
+    db.ref(sessionKey+'/_test').set(Date.now())
+      .then(()=>db.ref(sessionKey+'/_test').once('value'))
+      .then(snap=>{
+        if(!snap.exists()) throw{msg:'No se pudo leer. Revisá el modo prueba en Firebase.'};
+        // Publicar datos del sprint para que los participantes los vean
+        db.ref(sessionKey+'/sprintData').set(sprintData);
         switchScreen('facilitator');
         setupFacilitator();
       })
-      .catch(err => {
-        if (err.msg) showCfgError(err.msg);
-        else if (err.code === 'PERMISSION_DENIED') showCfgError('Permiso denegado. Asegurate de estar en "Modo de prueba" en Firebase.');
-        else showCfgError('Error: ' + (err.message || err));
+      .catch(err=>{
+        if(err.msg) showCfgError(err.msg);
+        else if(err.code==='PERMISSION_DENIED') showCfgError('Permiso denegado. Asegurate de estar en "Modo de prueba" en Firebase.');
+        else showCfgError('Error: '+(err.message||err));
       });
-  } catch(e) { showCfgError('API Key inválida. Revisá que no tenga espacios extra.'); }
+  }catch(e){showCfgError('API Key inválida. Revisá que no tenga espacios extra.');}
 }
+function showCfgError(msg){const el=document.getElementById('config-error');el.textContent=msg;el.style.display='block';}
 
-function showCfgError(msg) {
-  const el = document.getElementById('config-error');
-  el.textContent = msg; el.style.display = 'block';
+// ── SCREEN ROUTING ────────────────────────────
+function switchScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='';});
+  const map={config:'config-screen',facilitator:'facilitator-screen',participant:'participant-screen',history:'history-screen'};
+  const el=document.getElementById(map[name]);
+  if(el){el.style.display='flex';el.classList.add('active');}
 }
-
-// ─────────────────────────────────────────────
-// SCREEN ROUTING
-// ─────────────────────────────────────────────
-function switchScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
-  const map = { config:'config-screen', facilitator:'facilitator-screen', participant:'participant-screen', history:'history-screen' };
-  const el = document.getElementById(map[name]);
-  if (el) { el.style.display = 'flex'; el.classList.add('active'); }
-}
-
-function showPhase(name) {
-  ['voting','retro','summary'].forEach(p => {
-    const el = document.getElementById('phase-' + p);
-    if (el) { el.classList.remove('active'); el.style.display = ''; }
+function showPhase(name){
+  ['voting','retro','summary'].forEach(p=>{
+    const el=document.getElementById('phase-'+p);
+    if(el){el.classList.remove('active');el.style.display='';}
   });
-  const target = document.getElementById('phase-' + name);
-  if (target) { target.style.display = 'block'; setTimeout(() => target.classList.add('active'), 10); }
+  const target=document.getElementById('phase-'+name);
+  if(target){target.style.display='block';setTimeout(()=>target.classList.add('active'),10);}
 }
 
-// ─────────────────────────────────────────────
-// FACILITATOR SETUP
-// ─────────────────────────────────────────────
-function setupFacilitator() {
-  document.getElementById('f-sprint-label').textContent = sprintName;
+// ── FACILITATOR SETUP ─────────────────────────
+function setupFacilitator(){
+  document.getElementById('f-sprint-label').textContent=sprintName;
   renderTopicGrid();
   generateQR();
   listenVotes();
   listenParticipants();
 }
 
-function renderTopicGrid() {
-  const grid = document.getElementById('topic-grid');
-  grid.innerHTML = '';
-  TOPICS.forEach(t => {
-    const card = document.createElement('div');
-    card.className = 'topic-card';
-    card.id = 'topic-' + t.id;
-    card.innerHTML = `<div class="t-name">${t.icon} ${t.name}</div>
+function renderTopicGrid(){
+  const grid=document.getElementById('topic-grid');
+  grid.innerHTML='';
+  TOPICS.forEach(t=>{
+    const card=document.createElement('div');
+    card.className='topic-card';
+    card.id='topic-'+t.id;
+    card.innerHTML=`<div class="t-name">${t.icon} ${t.name}</div>
       <div class="t-desc">${t.desc}</div>
       <div class="vote-bar-wrap"><div class="vote-bar" id="bar-${t.id}"></div></div>
       <div class="vote-count" id="cnt-${t.id}">0 votos</div>`;
+    // Facilitator can click to override/confirm topic
+    card.onclick=()=>confirmTopicOverride(t);
     grid.appendChild(card);
   });
 }
 
-function generateQR() {
-  const baseUrl = window.location.origin + window.location.pathname;
-  const apiKey  = document.getElementById('fb-apikey').value.trim();
-  const dbUrl   = document.getElementById('fb-dburl').value.trim();
-  const url = baseUrl + '?session=' + sessionKey + '&mode=participant&apikey=' + encodeURIComponent(apiKey) + '&dburl=' + encodeURIComponent(dbUrl);
-  document.getElementById('qr-code').innerHTML = '';
-  new QRCode(document.getElementById('qr-code'), {
-    text: url, width: 148, height: 148,
-    colorDark: '#f0f0ee', colorLight: '#1e2127',
-    correctLevel: QRCode.CorrectLevel.M
-  });
-  document.getElementById('voter-link-box').textContent = url;
-  window._participantUrl = url;
+function generateQR(){
+  const baseUrl=window.location.origin+window.location.pathname;
+  const apiKey=document.getElementById('fb-apikey').value.trim();
+  const dbUrl =document.getElementById('fb-dburl').value.trim();
+  const url=baseUrl+'?session='+sessionKey+'&mode=participant&apikey='+encodeURIComponent(apiKey)+'&dburl='+encodeURIComponent(dbUrl);
+  document.getElementById('qr-code').innerHTML='';
+  new QRCode(document.getElementById('qr-code'),{text:url,width:148,height:148,colorDark:'#f0f0ee',colorLight:'#1e2127',correctLevel:QRCode.CorrectLevel.M});
+  document.getElementById('voter-link-box').textContent=url;
+  window._participantUrl=url;
 }
-
-function copyLink() {
-  if (!window._participantUrl) return;
-  navigator.clipboard.writeText(window._participantUrl).then(() => {
-    const btn = document.getElementById('btn-copy');
-    btn.textContent = '✓ Copiado';
-    setTimeout(() => btn.textContent = '📋 Copiar link', 1800);
+function copyLink(){
+  if(!window._participantUrl) return;
+  navigator.clipboard.writeText(window._participantUrl).then(()=>{
+    const btn=document.getElementById('btn-copy');
+    btn.textContent='✓ Copiado';
+    setTimeout(()=>btn.textContent='📋 Copiar link',1800);
   });
 }
 
-function listenVotes() {
-  db.ref(sessionKey + '/votes').on('value', snap => {
-    const votes = snap.val() || {};
-    const counts = {};
-    TOPICS.forEach(t => counts[t.id] = 0);
-    Object.values(votes).forEach(uv => {
-      if (Array.isArray(uv)) uv.forEach(tid => { if (counts[tid] !== undefined) counts[tid]++; });
+function listenVotes(){
+  db.ref(sessionKey+'/votes').on('value',snap=>{
+    const votes=snap.val()||{};
+    const counts={};
+    TOPICS.forEach(t=>counts[t.id]=0);
+    Object.values(votes).forEach(uv=>{if(Array.isArray(uv)) uv.forEach(tid=>{if(counts[tid]!==undefined) counts[tid]++;});});
+    const total=Object.keys(votes).length;
+    const max=Math.max(...Object.values(counts),1);
+    TOPICS.forEach(t=>{
+      const bar=document.getElementById('bar-'+t.id);
+      const cnt=document.getElementById('cnt-'+t.id);
+      const card=document.getElementById('topic-'+t.id);
+      if(bar) bar.style.width=(counts[t.id]/max*100)+'%';
+      if(cnt) cnt.textContent=counts[t.id]+' voto'+(counts[t.id]!==1?'s':'');
+      if(card) card.classList.toggle('leading',counts[t.id]===max&&counts[t.id]>0);
     });
-    const total = Object.keys(votes).length;
-    const max = Math.max(...Object.values(counts), 1);
-    TOPICS.forEach(t => {
-      const bar = document.getElementById('bar-' + t.id);
-      const cnt = document.getElementById('cnt-' + t.id);
-      const card = document.getElementById('topic-' + t.id);
-      if (bar) bar.style.width = (counts[t.id] / max * 100) + '%';
-      if (cnt) cnt.textContent = counts[t.id] + ' voto' + (counts[t.id] !== 1 ? 's' : '');
-      if (card) card.classList.toggle('leading', counts[t.id] === max && counts[t.id] > 0);
-    });
-    document.getElementById('voter-count-num').textContent = total;
-    const leading = TOPICS.reduce((a, b) => counts[a.id] >= counts[b.id] ? a : b);
-    selectedTopic = counts[leading.id] > 0 ? leading : null;
-    document.getElementById('btn-start').disabled = !selectedTopic;
+    document.getElementById('voter-count-num').textContent=total;
+    // Show confirm box when there are votes
+    if(total>0){
+      const leading=TOPICS.reduce((a,b)=>counts[a.id]>=counts[b.id]?a:b);
+      if(!selectedTopic) selectedTopic=counts[leading.id]>0?leading:null;
+      updateConfirmBox(leading,counts);
+    }
+    document.getElementById('btn-start').disabled=!selectedTopic;
   });
 }
 
-function listenParticipants() {
-  db.ref(sessionKey + '/participants').on('value', snap => {
-    const n = snap.numChildren();
-    const el = document.getElementById('live-count');
-    if (el) el.textContent = n;
+function updateConfirmBox(leading,counts){
+  const box=document.getElementById('confirm-box');
+  box.style.display='block';
+  document.getElementById('ct-winner-name').textContent=leading.icon+' '+leading.name;
+  // Show alternative topics (top 4 with votes, excluding leading)
+  const alts=TOPICS.filter(t=>t.id!==leading.id&&counts[t.id]>0)
+    .sort((a,b)=>counts[b.id]-counts[a.id]).slice(0,4);
+  const altContainer=document.getElementById('ct-alt-topics');
+  altContainer.innerHTML=alts.map(t=>`
+    <button onclick="confirmTopicOverride(TOPICS.find(x=>x.id==='${t.id}'))"
+      style="background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:999px;padding:4px 10px;font-size:11px;cursor:pointer;">
+      ${t.icon} ${t.name} (${counts[t.id]})
+    </button>`).join('');
+  // Highlight confirmed
+  TOPICS.forEach(t=>{
+    const card=document.getElementById('topic-'+t.id);
+    if(card) card.classList.toggle('confirmed',selectedTopic&&t.id===selectedTopic.id);
   });
 }
 
-// ─────────────────────────────────────────────
-// RETRO FLOW — FACILITATOR
-// ─────────────────────────────────────────────
-function startRetro() {
-  if (!selectedTopic) return;
-  retroData = { topic: selectedTopic.id, sprint: sprintName, date: new Date().toLocaleDateString('es-UY'), steps: {} };
-  db.ref(sessionKey + '/phase').set({ name: 'retro', step: 0, topic: selectedTopic.id });
-  document.getElementById('f-topic-badge').textContent = selectedTopic.icon + ' ' + selectedTopic.name;
-  document.getElementById('f-sprint-badge').textContent = sprintName;
-  currentStep = 0;
+function confirmTopicOverride(topic){
+  selectedTopic=topic;
+  document.getElementById('ct-winner-name').textContent=topic.icon+' '+topic.name;
+  TOPICS.forEach(t=>{
+    const card=document.getElementById('topic-'+t.id);
+    if(card) card.classList.toggle('confirmed',t.id===topic.id);
+  });
+  document.getElementById('btn-start').disabled=false;
+}
+
+function listenParticipants(){
+  db.ref(sessionKey+'/participants').on('value',snap=>{
+    const n=snap.numChildren();
+    const el=document.getElementById('live-count');
+    if(el) el.textContent=n;
+  });
+}
+
+// ── RETRO FLOW ────────────────────────────────
+function startRetro(){
+  if(!selectedTopic) return;
+  retroData={topic:selectedTopic.id,sprint:sprintName,date:new Date().toLocaleDateString('es-UY'),steps:{},sprintData};
+  db.ref(sessionKey+'/phase').set({name:'retro',step:0,topic:selectedTopic.id});
+  document.getElementById('f-topic-badge').textContent=selectedTopic.icon+' '+selectedTopic.name;
+  document.getElementById('f-sprint-badge').textContent=sprintName;
+  currentStep=0;
   showPhase('retro');
   renderStepNav();
   renderFacilitatorStep(0);
 }
 
-function renderStepNav() {
-  const container = document.getElementById('retro-steps');
-  container.innerHTML = '';
-  STEPS.forEach((s, i) => {
-    const pill = document.createElement('div');
-    pill.className = 'step-pill' + (i === currentStep ? ' active' : '') + (i < currentStep ? ' done' : '');
-    pill.textContent = s.name;
-    pill.onclick = () => goToStep(i);
+function renderStepNav(){
+  const container=document.getElementById('retro-steps');
+  container.innerHTML='';
+  STEPS.forEach((s,i)=>{
+    const pill=document.createElement('div');
+    pill.className='step-pill'+(i===currentStep?' active':'')+(i<currentStep?' done':'');
+    pill.textContent=s.name;
+    pill.onclick=()=>goToStep(i);
     container.appendChild(pill);
   });
 }
 
-function goToStep(idx) {
-  currentStep = idx;
-  db.ref(sessionKey + '/phase').set({ name: 'retro', step: idx, topic: selectedTopic.id });
+function goToStep(idx){
+  currentStep=idx;
+  db.ref(sessionKey+'/phase').set({name:'retro',step:idx,topic:selectedTopic.id});
   renderStepNav();
   renderFacilitatorStep(idx);
   stopTimer();
 }
 
-function renderFacilitatorStep(idx) {
+function renderFacilitatorStep(idx){
   stopTimer();
-  const step = STEPS[idx];
-  const content = document.getElementById('step-content');
-  timerSecs = step.mins * 60;
+  const step=STEPS[idx];
+  const content=document.getElementById('step-content');
+  timerSecs=step.mins*60;
+  let html=`<div class="step-header"><h2>${step.name}</h2><div class="timer-badge" id="timer" onclick="toggleTimer()">${formatTime(timerSecs)}</div></div>`;
 
-  let questions = [];
-  if (idx === 2 && selectedTopic) questions = TOPIC_QUESTIONS[selectedTopic.id] || [];
-  else if (STEP_PROMPTS[step.id]) questions = STEP_PROMPTS[step.id].questions || [];
+  if(idx===0){
+    // CHECK-IN: solo lectura de ideas, sin preguntas de votación
+    html+=`<p style="font-size:14px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6">
+      El equipo comparte cómo llega a la retro. Leé algunas en voz alta para abrir la sesión. No hay votación en este paso.
+    </p>`;
+    html+=`<p class="section-title" style="margin-bottom:8px">Respuestas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+      <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando respuestas del equipo...</div></div>`;
 
-  let html = `<div class="step-header">
-    <h2>${step.name}</h2>
-    <div class="timer-badge" id="timer" onclick="toggleTimer()">${formatTime(timerSecs)}</div>
-  </div>`;
+  } else if(idx===1){
+    // DATOS: mostrar los datos precargados del sprint, editables
+    const sd=sprintData.current||{};
+    html+=`<p class="section-title" style="margin-bottom:8px">Datos del sprint actual — editables</p>
+      <div class="sprint-data-grid">
+        <div class="sprint-data-cell"><div class="sdc-label">Vel. comprometida</div><input type="number" id="ed-vel-est" value="${sd.velEst||''}" placeholder="—" onchange="updateSprintField('velEst',this.value)"/><div class="sdc-note">puntos planeados</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Vel. promedio real</div><input type="number" id="ed-vel" value="${sd.vel||''}" placeholder="—" onchange="updateSprintField('vel',this.value)"/><div class="sdc-note">puntos completados</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Carry over</div><input type="number" id="ed-carry" value="${sd.carry||''}" placeholder="—" onchange="updateSprintField('carry',this.value)"/><div class="sdc-note">items no cerrados</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Lead time</div><input type="number" id="ed-leadtime" value="${sd.leadtime||''}" placeholder="—" onchange="updateSprintField('leadtime',this.value)"/><div class="sdc-note">días promedio</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Cantidad de errores</div><input type="number" id="ed-bugs" value="${sd.bugs||''}" placeholder="—" onchange="updateSprintField('bugs',this.value)"/><div class="sdc-note">indicador de calidad</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Cantidad de incidentes</div><input type="number" id="ed-incidents" value="${sd.incidents||''}" placeholder="—" onchange="updateSprintField('incidents',this.value)"/><div class="sdc-note">indicador de calidad</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Rechazos por QA</div><input type="number" id="ed-qa" value="${sd.qa||''}" placeholder="—" onchange="updateSprintField('qa',this.value)"/><div class="sdc-note">indicador de calidad</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Efectividad del sprint</div><input type="number" id="ed-efectividad" value="${sd.efectividad||''}" placeholder="—" onchange="updateSprintField('efectividad',this.value)"/><div class="sdc-note">% completado</div></div>
+      </div>`;
+    // Sprints anteriores
+    if(sprintData.prev1||sprintData.prev2){
+      html+=`<p class="section-title" style="margin-bottom:8px">Comparativa sprints anteriores</p><div class="prev-sprints">`;
+      [sprintData.prev1,sprintData.prev2].filter(Boolean).forEach(sp=>{
+        html+=`<div class="prev-sprint-row">
+          <div class="psr-name">${sp.name}</div>
+          <div class="psr-data">
+            <div class="psr-item">Vel. comp. <span>${sp.velEst}</span></div>
+            <div class="psr-item">Vel. real <span>${sp.vel}</span></div>
+            <div class="psr-item">Carry <span>${sp.carry}</span></div>
+            <div class="psr-item">Lead time <span>${sp.leadtime}</span></div>
+            <div class="psr-item">Errores <span>${sp.bugs}</span></div>
+            <div class="psr-item">Incidentes <span>${sp.incidents}</span></div>
+            <div class="psr-item">QA <span>${sp.qa}</span></div>
+            <div class="psr-item">Efectividad <span>${sp.efectividad}%</span></div>
+          </div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`<p class="section-title" style="margin-bottom:8px">Observaciones del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+      <div class="ideas-board" id="ideas-board"><div class="empty-board">El equipo puede agregar observaciones sobre los datos...</div></div>`;
 
-  if (questions.length) {
-    html += `<ul class="questions-list">${questions.map((q,i) => `<li ${i===0?'class="hl"':''}>${q}</li>`).join('')}</ul>`;
+  } else {
+    // EXPLORACIÓN, INSIGHTS, ACCIONES
+    const questions=idx===2&&selectedTopic?TOPIC_QUESTIONS[selectedTopic.id]||[]:[];
+    if(questions.length){
+      html+=`<ul class="questions-list">${questions.map((q,i)=>`<li ${i===0?'class="hl"':''}>${q}</li>`).join('')}</ul>`;
+    }
+    html+=`<p class="section-title" style="margin-bottom:8px">Ideas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+      <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando aportes del equipo...</div></div>`;
   }
 
-  html += `<p class="section-title" style="margin-bottom:8px">Ideas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
-    <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando aportes del equipo...</div></div>`;
-
-  const isLast = idx === STEPS.length - 1;
-  html += `<div class="btn-row" style="margin-top:1.5rem">
-    ${idx > 0 ? `<button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>` : ''}
+  const isLast=idx===STEPS.length-1;
+  html+=`<div class="btn-row" style="margin-top:1.5rem">
+    ${idx>0?`<button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>`:''}
     ${!isLast
-      ? `<button class="btn-accent btn-next" onclick="goToStep(${idx+1})">Siguiente paso →</button>`
-      : `<button class="btn-accent btn-next" onclick="finishRetro()">Finalizar retro ✓</button>`}
+      ?`<button class="btn-accent btn-next" onclick="goToStep(${idx+1})">Siguiente paso →</button>`
+      :`<button class="btn-accent btn-next" onclick="finishRetro()">Finalizar retro ✓</button>`}
   </div>`;
 
-  content.innerHTML = html;
+  content.innerHTML=html;
 
-  // Update side panel instructions
-  const instructions = {
-    checkin:  'El equipo está escribiendo su check-in. Podés leer algunas en voz alta para abrir la sesión.',
-    datos:    'El equipo comparte datos del sprint. Usá los números como punto de partida.',
-    explora:  'El equipo aporta ideas. Cuando terminen de escribir, invitalos a votar las más importantes.',
-    insights: 'El equipo vota los insights más relevantes. Los más votados quedan arriba.',
-    acciones: 'El equipo propone y vota acciones concretas. Los más votados son los compromisos del sprint.',
+  const instructions={
+    checkin: 'Sin votación. Leé algunas respuestas en voz alta para abrir la sesión.',
+    datos:   'Los datos están visibles para todo el equipo. Podés editarlos en tiempo real. El equipo puede agregar observaciones.',
+    explora: 'El equipo aporta ideas. Cuando terminen, invitalos a votar las más importantes (hasta 3 votos).',
+    insights:'El equipo vota los insights más relevantes (hasta 2 votos). Los más votados quedan arriba.',
+    acciones:'El equipo propone y vota acciones concretas (hasta 2 votos). Los más votados son los compromisos del sprint.',
   };
-  const panel = document.getElementById('panel-instructions');
-  if (panel) panel.textContent = instructions[step.id] || '';
+  const panel=document.getElementById('panel-instructions');
+  if(panel) panel.textContent=instructions[step.id]||'';
 
-  listenIdeas(step.id, step.maxVotes);
+  listenIdeas(step.id,step.maxVotes);
   startTimer();
 }
 
-function listenIdeas(stepId, maxVotes) {
-  db.ref(sessionKey + '/ideas/' + stepId).on('value', snap => {
-    const ideas = snap.val() || {};
-    const board = document.getElementById('ideas-board');
-    if (!board) return;
-    const list = Object.entries(ideas)
-      .map(([k, v]) => ({ id: k, ...v }))
-      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
-    const count = document.getElementById('idea-count');
-    if (count) count.textContent = list.length ? `(${list.length})` : '';
-    if (!list.length) { board.innerHTML = '<div class="empty-board">Esperando aportes del equipo...</div>'; return; }
-    const topVotes = list[0].votes || 0;
-    board.innerHTML = list.map(idea => `
-      <div class="idea-card ${idea.votes === topVotes && topVotes > 0 ? 'top-voted' : ''}">
-        <div class="idea-text">${escapeHtml(idea.text)}</div>
-        <div class="vote-btn">👍 ${idea.votes || 0}</div>
+function updateSprintField(field,value){
+  if(sprintData.current) sprintData.current[field]=value;
+  retroData.sprintData=sprintData;
+  // Sync to Firebase so participants see live edits
+  db.ref(sessionKey+'/sprintData/current/'+field).set(value);
+}
+
+function listenIdeas(stepId,maxVotes){
+  db.ref(sessionKey+'/ideas/'+stepId).on('value',snap=>{
+    const ideas=snap.val()||{};
+    const board=document.getElementById('ideas-board');
+    if(!board) return;
+    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v})).sort((a,b)=>(b.votes||0)-(a.votes||0));
+    const count=document.getElementById('idea-count');
+    if(count) count.textContent=list.length?`(${list.length})`:'';
+    if(!list.length){board.innerHTML='<div class="empty-board">Esperando aportes del equipo...</div>';return;}
+    const topVotes=list[0].votes||0;
+    board.innerHTML=list.map(idea=>`
+      <div class="idea-card ${idea.votes===topVotes&&topVotes>0?'top-voted':''}">
+        <div style="flex:1">
+          ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
+          <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+        </div>
+        <div class="vote-btn">👍 ${idea.votes||0}</div>
       </div>`).join('');
-    // save to retroData
-    if (!retroData.steps) retroData.steps = {};
-    retroData.steps[stepId] = list;
+    if(!retroData.steps) retroData.steps={};
+    retroData.steps[stepId]=list;
   });
 }
 
-// ─────────────────────────────────────────────
-// FINISH & SUMMARY
-// ─────────────────────────────────────────────
-function finishRetro() {
+// ── FINISH & SUMMARY ──────────────────────────
+function finishRetro(){
   stopTimer();
-  db.ref(sessionKey + '/phase').set({ name: 'finished' });
-  const record = { ...retroData, savedAt: Date.now() };
-  const history = JSON.parse(localStorage.getItem('retro_history') || '[]');
+  db.ref(sessionKey+'/phase').set({name:'finished'});
+  const record={...retroData,savedAt:Date.now()};
+  const history=JSON.parse(localStorage.getItem('retro_history')||'[]');
   history.unshift(record);
-  localStorage.setItem('retro_history', JSON.stringify(history.slice(0, 20)));
+  localStorage.setItem('retro_history',JSON.stringify(history.slice(0,20)));
   showPhase('summary');
   renderSummary(record);
 }
 
-function renderSummary(record) {
-  const topic = TOPICS.find(t => t.id === record.topic);
-  let html = `<div class="summary-card">
-    <h3>${topic ? topic.icon + ' ' + topic.name : 'Retro'} — ${record.sprint}</h3>
+function renderSummary(record){
+  const topic=TOPICS.find(t=>t.id===record.topic);
+  const sd=record.sprintData&&record.sprintData.current;
+  let html=`<div class="summary-card"><h3>${topic?topic.icon+' '+topic.name:'Retro'} — ${record.sprint}</h3>
     <div class="summary-section"><div class="slabel">Fecha</div><p>${record.date}</p></div>`;
-  STEPS.forEach(s => {
-    const ideas = record.steps && record.steps[s.id];
-    if (ideas && ideas.length) {
-      html += `<div class="summary-section"><div class="slabel">${s.name}</div>`;
-      ideas.slice(0, 5).forEach((idea, i) => {
-        html += `<div class="action-item-row ${i===0?'top-voted':''}">
+  if(sd){
+    html+=`<div class="summary-section"><div class="slabel">Datos del sprint</div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        ${sd.velEst!=='—'?`<span style="font-size:13px">Vel.comp. <strong>${sd.velEst}</strong></span>`:''}
+        ${sd.vel!=='—'?`<span style="font-size:13px">Vel.real <strong>${sd.vel}</strong></span>`:''}
+        ${sd.carry!=='—'?`<span style="font-size:13px">Carry over <strong>${sd.carry}</strong></span>`:''}
+        ${sd.leadtime!=='—'?`<span style="font-size:13px">Lead time <strong>${sd.leadtime}d</strong></span>`:''}
+        ${sd.bugs!=='—'?`<span style="font-size:13px">Errores <strong>${sd.bugs}</strong></span>`:''}
+        ${sd.incidents!=='—'?`<span style="font-size:13px">Incidentes <strong>${sd.incidents}</strong></span>`:''}
+        ${sd.qa!=='—'?`<span style="font-size:13px">Rechazos QA <strong>${sd.qa}</strong></span>`:''}
+        ${sd.efectividad!=='—'?`<span style="font-size:13px">Efectividad <strong>${sd.efectividad}%</strong></span>`:''}
+      </div></div>`;
+  }
+  STEPS.forEach(s=>{
+    const ideas=record.steps&&record.steps[s.id];
+    if(ideas&&ideas.length){
+      html+=`<div class="summary-section"><div class="slabel">${s.name}</div>`;
+      ideas.slice(0,5).forEach((idea,i)=>{
+        html+=`<div class="action-item-row ${i===0&&idea.votes>0?'top-voted':''}">
           <div class="action-rank">${idea.votes||0}👍</div>
           <div class="action-text">${escapeHtml(idea.text)}</div>
-          ${idea.owner ? `<div class="action-owner">${escapeHtml(idea.owner)}</div>` : ''}
         </div>`;
       });
-      html += `</div>`;
+      html+=`</div>`;
     }
   });
-  html += `</div>`;
-  document.getElementById('summary-content').innerHTML = html;
+  html+=`</div>`;
+  document.getElementById('summary-content').innerHTML=html;
 }
 
-function exportTxt() {
-  const topic = TOPICS.find(t => t.id === retroData.topic);
-  let txt = `RETROSPECTIVA — ${retroData.sprint}\nTema: ${topic ? topic.name : '—'}\nFecha: ${retroData.date}\n\n`;
-  STEPS.forEach(s => {
-    const ideas = retroData.steps && retroData.steps[s.id];
-    if (ideas && ideas.length) {
-      txt += `## ${s.name}\n`;
-      ideas.forEach(i => txt += `- [${i.votes||0}👍] ${i.text}${i.owner?' ['+i.owner+']':''}\n`);
-      txt += '\n';
+function exportTxt(){
+  const topic=TOPICS.find(t=>t.id===retroData.topic);
+  const sd=retroData.sprintData&&retroData.sprintData.current;
+  let txt=`RETROSPECTIVA — ${retroData.sprint}\nTema: ${topic?topic.name:'—'}\nFecha: ${retroData.date}\n\n`;
+  if(sd) txt+=`## Datos del sprint\nVelocity real: ${sd.vel} / Estimado: ${sd.velEst}\nCarry over: ${sd.carry} / Bugs: ${sd.bugs} / Tickets: ${sd.tickets} / Incidents: ${sd.incidents}\n\n`;
+  STEPS.forEach(s=>{
+    const ideas=retroData.steps&&retroData.steps[s.id];
+    if(ideas&&ideas.length){
+      txt+=`## ${s.name}\n`;
+      ideas.forEach(i=>txt+=`- [${i.votes||0}👍] ${i.text}\n`);
+      txt+='\n';
     }
   });
-  const blob = new Blob([txt], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `retro-${(retroData.sprint||'retro').replace(/\s/g,'-')}.txt`;
+  const blob=new Blob([txt],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`retro-${(retroData.sprint||'retro').replace(/\s/g,'-')}.txt`;
   a.click();
 }
 
-function newRetro() {
-  showPhase('voting');
-  retroData = {};
-  currentStep = 0;
-  renderTopicGrid();
-  listenVotes();
-}
+function newRetro(){showPhase('voting');retroData={};currentStep=0;renderTopicGrid();listenVotes();}
 
-// ─────────────────────────────────────────────
-// TIMER
-// ─────────────────────────────────────────────
-function startTimer() {
+// ── TIMER ─────────────────────────────────────
+function startTimer(){
   updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    timerSecs--;
-    updateTimerDisplay();
-    if (timerSecs <= 0) { stopTimer(); const el = document.getElementById('timer'); if (el) el.classList.add('expired'); }
-  }, 1000);
-  const el = document.getElementById('timer');
-  if (el) el.classList.add('running');
+  timerInterval=setInterval(()=>{
+    timerSecs--;updateTimerDisplay();
+    if(timerSecs<=0){stopTimer();const el=document.getElementById('timer');if(el)el.classList.add('expired');}
+  },1000);
+  const el=document.getElementById('timer');if(el)el.classList.add('running');
 }
-function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
-function toggleTimer() {
-  if (timerInterval) { stopTimer(); const el = document.getElementById('timer'); if (el) el.classList.remove('running'); }
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
+function toggleTimer(){
+  if(timerInterval){stopTimer();const el=document.getElementById('timer');if(el)el.classList.remove('running');}
   else startTimer();
 }
-function updateTimerDisplay() {
-  const el = document.getElementById('timer');
-  if (el) el.textContent = formatTime(timerSecs);
-}
-function formatTime(s) {
-  const m = Math.floor(Math.abs(s)/60), sec = Math.abs(s)%60;
-  return (s<0?'-':'') + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-}
+function updateTimerDisplay(){const el=document.getElementById('timer');if(el)el.textContent=formatTime(timerSecs);}
+function formatTime(s){const m=Math.floor(Math.abs(s)/60),sec=Math.abs(s)%60;return(s<0?'-':'')+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
 
-// ─────────────────────────────────────────────
-// HISTORY
-// ─────────────────────────────────────────────
-function showHistory() {
-  const history = JSON.parse(localStorage.getItem('retro_history') || '[]');
-  const list = document.getElementById('history-list');
-  if (!history.length) {
-    list.innerHTML = '<div class="empty-state">No hay retros guardadas aún.</div>';
-  } else {
-    list.innerHTML = '';
-    history.forEach(r => {
-      const topic = TOPICS.find(t => t.id === r.topic);
-      const actions = Object.values(r.steps || {}).flat().length;
-      const item = document.createElement('div');
-      item.className = 'history-item';
-      item.innerHTML = `<div>
-        <div class="hi-badge">${topic ? topic.icon+' '+topic.name : '—'}</div>
+// ── HISTORY ───────────────────────────────────
+function showHistory(){
+  const history=JSON.parse(localStorage.getItem('retro_history')||'[]');
+  const list=document.getElementById('history-list');
+  if(!history.length){list.innerHTML='<div class="empty-state">No hay retros guardadas aún.</div>';}
+  else{
+    list.innerHTML='';
+    history.forEach(r=>{
+      const topic=TOPICS.find(t=>t.id===r.topic);
+      const item=document.createElement('div');
+      item.className='history-item';
+      item.innerHTML=`<div>
+        <div class="hi-badge">${topic?topic.icon+' '+topic.name:'—'}</div>
         <div style="font-size:14px;font-weight:600;margin-top:4px">${r.sprint||'Sprint'}</div>
-        <div style="font-size:12px;color:var(--muted)">${r.date||'—'} · ${actions} ideas</div>
+        <div style="font-size:12px;color:var(--muted)">${r.date||'—'}</div>
       </div><div style="font-size:12px;color:var(--muted)">Ver →</div>`;
-      item.onclick = () => showHistoryDetail(r);
+      item.onclick=()=>showHistoryDetail(r);
       list.appendChild(item);
     });
   }
   switchScreen('history');
 }
 
-function showHistoryDetail(r) {
-  const topic = TOPICS.find(t => t.id === r.topic);
-  document.getElementById('modal-title').textContent = topic ? topic.icon+' '+topic.name : 'Retro';
-  document.getElementById('modal-meta').textContent = (r.sprint||'') + ' · ' + (r.date||'');
-  let html = '';
-  STEPS.forEach(s => {
-    const ideas = r.steps && r.steps[s.id];
-    if (ideas && ideas.length) {
-      html += `<div style="margin-bottom:1rem"><div class="slabel" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${s.name}</div>`;
-      ideas.slice(0,5).forEach(i => {
-        html += `<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
+function showHistoryDetail(r){
+  const topic=TOPICS.find(t=>t.id===r.topic);
+  document.getElementById('modal-title').textContent=topic?topic.icon+' '+topic.name:'Retro';
+  document.getElementById('modal-meta').textContent=(r.sprint||'')+' · '+(r.date||'');
+  let html='';
+  STEPS.forEach(s=>{
+    const ideas=r.steps&&r.steps[s.id];
+    if(ideas&&ideas.length){
+      html+=`<div style="margin-bottom:1rem"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${s.name}</div>`;
+      ideas.slice(0,5).forEach(i=>{
+        html+=`<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
           <span style="color:var(--accent);font-size:12px">${i.votes||0}👍</span>
-          <span style="margin-left:8px">${escapeHtml(i.text)}</span>
-          ${i.owner?`<span style="color:var(--muted);margin-left:6px">[${escapeHtml(i.owner)}]</span>`:''}
-        </div>`;
+          <span style="margin-left:8px">${escapeHtml(i.text)}</span></div>`;
       });
-      html += `</div>`;
+      html+=`</div>`;
     }
   });
-  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-body').innerHTML=html;
   document.getElementById('modal').classList.add('open');
 }
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function backToFacilitator(){switchScreen('facilitator');}
 
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-function backToFacilitator() { switchScreen('facilitator'); }
-
-// ─────────────────────────────────────────────
-// PARTICIPANT SETUP
-// ─────────────────────────────────────────────
-function setupParticipant(sk, apiKey, dbUrl) {
-  participantId = 'p_' + Math.random().toString(36).substr(2, 9);
-  try {
-    if (!firebase.apps.length) firebase.initializeApp({ apiKey, databaseURL: dbUrl });
-    db = firebase.database();
-    sessionKey = sk;
-    db.ref(sessionKey + '/participants/' + participantId).set({ joined: Date.now() });
-    db.ref(sessionKey + '/participants/' + participantId).onDisconnect().remove();
+// ── PARTICIPANT ───────────────────────────────
+function setupParticipant(sk,apiKey,dbUrl){
+  participantId='p_'+Math.random().toString(36).substr(2,9);
+  try{
+    if(!firebase.apps.length) firebase.initializeApp({apiKey,databaseURL:dbUrl});
+    db=firebase.database();
+    sessionKey=sk;
+    db.ref(sessionKey+'/participants/'+participantId).set({joined:Date.now()});
+    db.ref(sessionKey+'/participants/'+participantId).onDisconnect().remove();
     switchScreen('participant');
     listenPhaseForParticipant();
-  } catch(e) {
-    document.getElementById('p-content').innerHTML = '<p style="color:var(--danger)">Error al conectar.</p>';
-  }
+  }catch(e){document.getElementById('p-content').innerHTML='<p style="color:var(--danger)">Error al conectar.</p>';}
 }
 
-function listenPhaseForParticipant() {
-  db.ref(sessionKey + '/phase').on('value', snap => {
-    const phase = snap.val();
-    if (!phase) { renderParticipantVoting(); return; }
-    if (phase.name === 'retro') renderParticipantStep(phase.step, phase.topic);
-    else if (phase.name === 'finished') renderParticipantFinished();
+function listenPhaseForParticipant(){
+  db.ref(sessionKey+'/phase').on('value',snap=>{
+    const phase=snap.val();
+    if(!phase) renderParticipantVoting();
+    else if(phase.name==='retro') renderParticipantStep(phase.step,phase.topic);
+    else if(phase.name==='finished') renderParticipantFinished();
     else renderParticipantVoting();
   });
 }
 
-// ── PARTICIPANT: VOTING ──
-let pSelectedTopics = [];
-let pVoted = false;
-
-function renderParticipantVoting() {
-  if (pVoted) { renderParticipantWaiting('¡Voto registrado!', 'Esperá a que el facilitador inicie la retro.'); return; }
-  pSelectedTopics = [];
-  const content = document.getElementById('p-content');
-  content.innerHTML = `<h2 style="font-size:20px;font-weight:700;margin-bottom:.25rem">Votá el tema</h2>
+// PARTICIPANT: VOTING
+let pSelectedTopics=[],pVoted=false;
+function renderParticipantVoting(){
+  if(pVoted){renderParticipantWaiting('¡Voto registrado!','Esperá a que el facilitador confirme el tema e inicie la retro.');return;}
+  pSelectedTopics=[];
+  const content=document.getElementById('p-content');
+  content.innerHTML=`<h2 style="font-size:20px;font-weight:700;margin-bottom:.25rem">Votá el tema</h2>
     <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">Elegí hasta 2 temas para esta retro</p>
     <div class="p-topic-list" id="p-topic-list"></div>
     <button class="btn-vote" id="p-btn-vote" disabled onclick="submitTopicVote()">Votar →</button>`;
-  const list = document.getElementById('p-topic-list');
-  TOPICS.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'p-topic'; div.id = 'pt-' + t.id;
-    div.innerHTML = `<div class="p-check" id="pchk-${t.id}"></div>
-      <div><div class="t-name">${t.icon} ${t.name}</div><div class="t-desc">${t.desc}</div></div>`;
-    div.onclick = () => {
-      if (pSelectedTopics.includes(t.id)) {
-        pSelectedTopics = pSelectedTopics.filter(x => x !== t.id);
-        div.classList.remove('selected');
-      } else if (pSelectedTopics.length < 2) {
-        pSelectedTopics.push(t.id);
-        div.classList.add('selected');
-      }
-      document.getElementById('p-btn-vote').disabled = pSelectedTopics.length === 0;
+  const list=document.getElementById('p-topic-list');
+  TOPICS.forEach(t=>{
+    const div=document.createElement('div');
+    div.className='p-topic';div.id='pt-'+t.id;
+    div.innerHTML=`<div class="p-check"></div><div><div class="t-name">${t.icon} ${t.name}</div><div class="t-desc">${t.desc}</div></div>`;
+    div.onclick=()=>{
+      if(pSelectedTopics.includes(t.id)){pSelectedTopics=pSelectedTopics.filter(x=>x!==t.id);div.classList.remove('selected');}
+      else if(pSelectedTopics.length<2){pSelectedTopics.push(t.id);div.classList.add('selected');}
+      document.getElementById('p-btn-vote').disabled=pSelectedTopics.length===0;
     };
     list.appendChild(div);
   });
 }
-
-function submitTopicVote() {
-  db.ref(sessionKey + '/votes/' + participantId).set(pSelectedTopics).then(() => {
-    pVoted = true;
-    renderParticipantWaiting('¡Voto registrado!', 'Esperá a que el facilitador inicie la retro.');
+function submitTopicVote(){
+  db.ref(sessionKey+'/votes/'+participantId).set(pSelectedTopics).then(()=>{
+    pVoted=true;
+    renderParticipantWaiting('¡Voto registrado!','Esperá a que el facilitador confirme el tema e inicie la retro.');
   });
 }
 
-// ── PARTICIPANT: RETRO STEP ──
-let pIdeasSubmitted = {};  // stepId -> [ideas]
-let pVotedIdeas = {};      // stepId -> {ideaId: true}
-let pCurrentStep = -1;
-let pCurrentTopic = null;
+// PARTICIPANT: RETRO STEP
+let pIdeasSubmitted={},pVotedIdeas={},pCurrentStep=-1;
+let pExploraQuestionIdx=0;  // current question index in exploration wizard
 
-function renderParticipantStep(stepIdx, topicId) {
-  pCurrentStep = stepIdx;
-  pCurrentTopic = topicId;
-  const step = STEPS[stepIdx];
-  const prompt = STEP_PROMPTS[step.id];
-  const topic = TOPICS.find(t => t.id === topicId);
+function renderParticipantStep(stepIdx,topicId){
+  pCurrentStep=stepIdx;
+  const step=STEPS[stepIdx];
+  const content=document.getElementById('p-content');
+  const alreadySent=pIdeasSubmitted[step.id]||[];
 
-  // Questions for exploration
-  let questions = [];
-  if (stepIdx === 2 && topicId) questions = TOPIC_QUESTIONS[topicId] || [];
-  else if (prompt && prompt.questions) questions = prompt.questions;
+  if(stepIdx===0){
+    // CHECK-IN: escribir, sin votación
+    content.innerHTML=`
+      <div style="margin-bottom:1rem">
+        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Check-in</div>
+        <div class="p-step-title">¿Cómo llegás a la retro?</div>
+        <div class="p-step-sub">Compartí una palabra o frase. Es anónimo.</div>
+      </div>
+      ${alreadySent.length?`<div class="ideas-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>`:''}
+      <textarea class="p-textarea" id="p-idea-input" placeholder="Ej: concentrado, cansado, con energía..."></textarea>
+      <button class="btn-vote" onclick="submitIdea('${step.id}')">Enviar →</button>`;
 
-  const content = document.getElementById('p-content');
-  const alreadySent = pIdeasSubmitted[step.id] || [];
+  } else if(stepIdx===1){
+    // DATOS: mostrar los datos en tiempo real, sin input de ideas
+    content.innerHTML=`
+      <div style="margin-bottom:1rem">
+        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Datos del sprint</div>
+        <div class="p-step-title">Cierre del sprint</div>
+        <div class="p-step-sub">Datos cargados por el facilitador. Podés agregar una observación.</div>
+      </div>
+      <div class="p-data-grid" id="p-data-grid"><div style="color:var(--muted);font-size:13px">Cargando datos...</div></div>
+      <div id="p-prev-sprints"></div>
+      <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1.25rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.5rem">¿Tenés alguna observación sobre los datos?</div>
+        ${alreadySent.length?`<div class="ideas-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>`:''}
+        <textarea class="p-textarea" id="p-idea-input" placeholder="Ej: el velocity bajó por las vacaciones..."></textarea>
+        <button class="btn-vote" onclick="submitIdea('${step.id}')">Enviar observación →</button>
+      </div>`;
+    listenSprintDataForParticipant();
 
-  // Show two sections: input + vote
-  content.innerHTML = `
-    <div style="margin-bottom:.75rem">
-      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">${step.name}</div>
-      <div class="p-step-title">${prompt ? prompt.title : step.name}</div>
-      <div class="p-step-sub">${prompt ? prompt.sub : ''}</div>
+  } else if(stepIdx===2){
+    // EXPLORACIÓN — wizard pregunta por pregunta
+    pExploraQuestionIdx=0;
+    renderExploraWizard(topicId);
+
+  } else if(stepIdx===3){
+    // INSIGHTS — explicación + top exploración + papelitos + votación
+    renderInsightsStep(topicId);
+
+  } else {
+    // ACCIONES
+    renderAccionesStep();
+  }
+}
+
+// ACCIONES STEP
+function renderAccionesStep(){
+  const content=document.getElementById('p-content');
+  const alreadySent=pIdeasSubmitted['acciones']||[];
+
+  content.innerHTML=`
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Acciones</div>
+      <div class="p-step-title">¿Qué hacemos?</div>
     </div>
-    ${questions.length ? `<div class="p-question">${questions[0]}</div>` : ''}
-    ${alreadySent.length ? `<div class="ideas-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>` : ''}
-    <textarea class="p-textarea" id="p-idea-input" placeholder="Escribí tu idea..."></textarea>
-    <button class="btn-vote" onclick="submitIdea('${step.id}')">Enviar idea</button>
-    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
-      <div style="font-size:13px;font-weight:600;margin-bottom:.5rem">Votá las ideas del equipo</div>
+
+    <!-- Top 3 insights -->
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">
+        Insights más votados
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem;line-height:1.5">
+        Usá estos aprendizajes como base para proponer acciones concretas.
+      </div>
+      <div id="p-insights-top"><div style="font-size:12px;color:var(--muted)">Cargando...</div></div>
+    </div>
+
+    <!-- Proponer acción -->
+    <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Proponé una acción</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem;line-height:1.5">
+        Que sea específica y que el equipo pueda hacer en el próximo sprint.
+      </div>
+      ${alreadySent.length?`<div class="ideas-sent" id="acciones-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>`:'<div class="ideas-sent" id="acciones-sent" style="display:none"></div>'}
+      <textarea class="p-textarea" id="p-idea-input" placeholder="Ej: Agregar una columna de bloqueos en el tablero y revisarla en el daily..."></textarea>
+      <button class="btn-vote" onclick="submitAccion()">Agregar acción →</button>
+    </div>
+
+    <!-- Votación -->
+    <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Votá las acciones del equipo</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Las más votadas serán los compromisos del sprint.</div>
       <div class="votes-left" id="p-votes-left"></div>
       <div id="p-ideas-vote-list"></div>
     </div>`;
 
-  listenIdeasForVoting(step.id, step.maxVotes);
+  // Load top 3 insights
+  db.ref(sessionKey+'/ideas/insights').once('value', snap=>{
+    const ideas=snap.val()||{};
+    const topDiv=document.getElementById('p-insights-top');
+    if(!topDiv) return;
+    const list=Object.entries(ideas)
+      .map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>(b.votes||0)-(a.votes||0))
+      .slice(0,3);
+    if(!list.length){
+      topDiv.innerHTML='<div style="font-size:12px;color:var(--muted)">Todavía no hay insights votados.</div>';
+      return;
+    }
+    topDiv.innerHTML=list.map((idea,i)=>`
+      <div style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;${i===0?'border:1px solid var(--accent)':'border:1px solid var(--border)'}">
+        <div style="font-size:18px;line-height:1">${['🥇','🥈','🥉'][i]}</div>
+        <div>
+          <div style="font-size:12px;line-height:1.5;color:var(--text)">${escapeHtml(idea.text)}</div>
+          ${idea.votes?`<div style="font-size:11px;color:var(--accent);margin-top:3px">${idea.votes} voto${idea.votes!==1?'s':''}</div>`:''}
+        </div>
+      </div>`).join('');
+  });
+
+  listenIdeasForVoting('acciones', STEPS.find(s=>s.id==='acciones').maxVotes);
 }
 
-function submitIdea(stepId) {
-  const input = document.getElementById('p-idea-input');
-  const text = input ? input.value.trim() : '';
-  if (!text) return;
-  const ideaRef = db.ref(sessionKey + '/ideas/' + stepId).push();
-  ideaRef.set({ text, votes: 0, submittedBy: participantId, ts: Date.now() }).then(() => {
-    if (!pIdeasSubmitted[stepId]) pIdeasSubmitted[stepId] = [];
-    pIdeasSubmitted[stepId].push(text);
-    input.value = '';
-    // refresh sent list
-    const sentDiv = document.querySelector('.ideas-sent');
-    if (sentDiv) sentDiv.innerHTML = pIdeasSubmitted[stepId].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
-    else {
-      const newSent = document.createElement('div');
-      newSent.className = 'ideas-sent';
-      newSent.innerHTML = pIdeasSubmitted[stepId].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
-      input.parentNode.insertBefore(newSent, input);
+function submitAccion(){
+  const input=document.getElementById('p-idea-input');
+  const text=input?input.value.trim():'';
+  if(!text) return;
+  db.ref(sessionKey+'/ideas/acciones').push({text,votes:0,submittedBy:participantId,ts:Date.now()}).then(()=>{
+    if(!pIdeasSubmitted['acciones']) pIdeasSubmitted['acciones']=[];
+    pIdeasSubmitted['acciones'].push(text);
+    if(input) input.value='';
+    const sentDiv=document.getElementById('acciones-sent');
+    if(sentDiv){
+      sentDiv.style.display='flex';
+      sentDiv.style.flexDirection='column';
+      sentDiv.style.gap='6px';
+      sentDiv.style.marginBottom='1rem';
+      sentDiv.innerHTML=pIdeasSubmitted['acciones'].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
     }
   });
 }
 
-function listenIdeasForVoting(stepId, maxVotes) {
-  db.ref(sessionKey + '/ideas/' + stepId).on('value', snap => {
-    const ideas = snap.val() || {};
-    const list = Object.entries(ideas)
-      .map(([k, v]) => ({ id: k, ...v }))
-      .filter(i => i.submittedBy !== participantId) // no votar las propias
-      .sort((a, b) => (b.votes||0) - (a.votes||0));
+// INSIGHTS STEP
+function renderInsightsStep(topicId){
+  const content=document.getElementById('p-content');
+  const alreadySent=pIdeasSubmitted['insights']||[];
 
-    const myVotes = pVotedIdeas[stepId] || {};
-    const usedVotes = Object.keys(myVotes).length;
-    const remaining = maxVotes - usedVotes;
+  content.innerHTML=`
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Insights</div>
+      <div class="p-step-title">¿Qué aprendimos?</div>
+    </div>
 
-    const votesLeftEl = document.getElementById('p-votes-left');
-    if (votesLeftEl) votesLeftEl.innerHTML = `Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx. ${maxVotes})`;
+    <!-- Explicación de insight -->
+    <div style="background:var(--surface2);border-left:3px solid var(--accent);border-radius:var(--radius);padding:12px 14px;margin-bottom:1.25rem">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">¿Qué es un insight?</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">
+        Un insight es una comprensión profunda que emerge de la experiencia del sprint.
+        No es solo "qué pasó", sino <em style="color:var(--text)">por qué pasó y qué significa para el equipo</em>.
+        Un buen insight conecta un patrón con una causa raíz.
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        Ejemplos: <em>"Cuando no refinamos bien, el carry over sube"</em> · <em>"Los bloqueos aparecen siempre al final del sprint, no al inicio"</em>
+      </div>
+    </div>
 
-    const voteList = document.getElementById('p-ideas-vote-list');
-    if (!voteList) return;
-    if (!list.length) { voteList.innerHTML = '<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas de otros participantes.</div>'; return; }
-    voteList.innerHTML = list.map(idea => {
-      const isVoted = !!myVotes[idea.id];
-      const canVote = remaining > 0 || isVoted;
+    <!-- Top exploración -->
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Lo más votado en exploración</div>
+      <div id="p-explora-top"><div style="font-size:12px;color:var(--muted)">Cargando...</div></div>
+    </div>
+
+    <!-- Papelito propio -->
+    <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Sumá tu insight</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">¿Qué aprendizaje o patrón ves vos en lo que exploró el equipo?</div>
+      ${alreadySent.length?`<div class="ideas-sent" id="insights-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>`:'<div class="ideas-sent" id="insights-sent" style="display:none"></div>'}
+      <textarea class="p-textarea" id="p-idea-input" placeholder="Ej: Siempre que tenemos dependencias no mapeadas, el carry over sube..."></textarea>
+      <button class="btn-vote" onclick="submitInsight()">Agregar papelito →</button>
+    </div>
+
+    <!-- Votación -->
+    <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Votá los insights del equipo</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Elegí los que más resuenan con tu experiencia del sprint.</div>
+      <div class="votes-left" id="p-votes-left"></div>
+      <div id="p-ideas-vote-list"></div>
+    </div>`;
+
+  // Load top 5 from exploración
+  db.ref(sessionKey+'/ideas/explora').once('value', snap=>{
+    const ideas=snap.val()||{};
+    const topDiv=document.getElementById('p-explora-top');
+    if(!topDiv) return;
+    const list=Object.entries(ideas)
+      .map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>(b.votes||0)-(a.votes||0))
+      .slice(0,5);
+    if(!list.length){
+      topDiv.innerHTML='<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas votadas en exploración.</div>';
+      return;
+    }
+    topDiv.innerHTML=list.map(idea=>`
+      <div style="background:var(--surface2);border-radius:var(--radius);padding:9px 12px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start">
+        <div style="color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap;min-width:28px">${idea.votes||0}👍</div>
+        <div style="font-size:12px;line-height:1.5;color:var(--text)">${escapeHtml(idea.shortText||idea.text)}</div>
+      </div>`).join('');
+  });
+
+  listenIdeasForVoting('insights', STEPS.find(s=>s.id==='insights').maxVotes);
+}
+
+function submitInsight(){
+  const input=document.getElementById('p-idea-input');
+  const text=input?input.value.trim():'';
+  if(!text) return;
+  db.ref(sessionKey+'/ideas/insights').push({text,votes:0,submittedBy:participantId,ts:Date.now()}).then(()=>{
+    if(!pIdeasSubmitted['insights']) pIdeasSubmitted['insights']=[];
+    pIdeasSubmitted['insights'].push(text);
+    if(input) input.value='';
+    const sentDiv=document.getElementById('insights-sent');
+    if(sentDiv){
+      sentDiv.style.display='flex';
+      sentDiv.style.flexDirection='column';
+      sentDiv.style.gap='6px';
+      sentDiv.style.marginBottom='1rem';
+      sentDiv.innerHTML=pIdeasSubmitted['insights'].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
+    }
+  });
+}
+
+// EXPLORATION WIZARD — one question at a time
+function renderExploraWizard(topicId){
+  const topic=TOPICS.find(t=>t.id===topicId);
+  const questions=TOPIC_QUESTIONS[topicId]||[];
+  const total=questions.length;
+  const idx=pExploraQuestionIdx;
+  const stepId='explora';
+  const content=document.getElementById('p-content');
+
+  if(idx>=total){
+    // All questions answered — show summary + voting
+    const answered=pIdeasSubmitted[stepId]||[];
+    content.innerHTML=`
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Exploración</div>
+        <div class="p-step-title">¡Listo! Tus respuestas</div>
+        <div class="p-step-sub">Ya enviaste tus reflexiones. Ahora podés votar las ideas del resto del equipo.</div>
+      </div>
+      <div class="ideas-sent">${answered.map((t,i)=>`
+        <div class="idea-sent">
+          <div style="font-size:10px;color:var(--accent);margin-bottom:2px">${questions[i]||''}</div>
+          ${escapeHtml(t)}
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.5rem">Votá las ideas del equipo</div>
+        <div class="votes-left" id="p-votes-left"></div>
+        <div id="p-ideas-vote-list"></div>
+      </div>`;
+    listenIdeasForVoting(stepId, STEPS.find(s=>s.id===stepId).maxVotes);
+    return;
+  }
+
+  const question=questions[idx];
+  const isLast=idx===total-1;
+
+  content.innerHTML=`
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase">
+          ${topic?topic.icon+' '+topic.name:'Exploración'}
+        </div>
+        <div style="font-size:12px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:3px 10px">
+          ${idx+1} / ${total}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:1.25rem">
+        ${questions.map((_,i)=>`<div style="flex:1;height:3px;border-radius:2px;background:${i<=idx?'var(--accent)':'var(--border)'}"></div>`).join('')}
+      </div>
+      <div class="p-step-title" style="font-size:17px;line-height:1.4;margin-bottom:1.5rem">${escapeHtml(question)}</div>
+    </div>
+    <textarea class="p-textarea" id="p-explora-input" placeholder="Escribí tu reflexión..." style="min-height:110px"></textarea>
+    <button class="btn-vote" id="p-explora-btn" onclick="submitExploraAnswer('${topicId}',${idx},${total})">
+      ${isLast ? 'Enviar y ver resultados ✓' : 'Enviar y seguir →'}
+    </button>
+    ${idx>0?`<button onclick="pExploraQuestionIdx--;renderExploraWizard('${topicId}')" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);padding:10px;font-size:13px;cursor:pointer;">← Anterior</button>`:''}`;
+}
+
+function submitExploraAnswer(topicId,idx,total){
+  const input=document.getElementById('p-explora-input');
+  const text=input?input.value.trim():'';
+  if(!text) return;
+  const btn=document.getElementById('p-explora-btn');
+  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
+  // Tag the idea with the question so facilitator sees context
+  const questions=TOPIC_QUESTIONS[topicId]||[];
+  const label=`[${questions[idx]}] ${text}`;
+  db.ref(sessionKey+'/ideas/explora').push({
+    text: label,
+    shortText: text,
+    question: questions[idx],
+    questionIdx: idx,
+    votes:0,
+    submittedBy:participantId,
+    ts:Date.now()
+  }).then(()=>{
+    if(!pIdeasSubmitted['explora']) pIdeasSubmitted['explora']=[];
+    pIdeasSubmitted['explora'].push(text);
+    pExploraQuestionIdx=idx+1;
+    renderExploraWizard(topicId);
+  });
+}
+
+function listenSprintDataForParticipant(){
+  db.ref(sessionKey+'/sprintData').on('value',snap=>{
+    const sd=snap.val();
+    if(!sd) return;
+    const grid=document.getElementById('p-data-grid');
+    const prevDiv=document.getElementById('p-prev-sprints');
+    if(!grid) return;
+    const cur=sd.current||{};
+    const fields=[
+      {label:'Vel. comprometida', val:cur.velEst,      note:'puntos planeados'},
+      {label:'Vel. promedio real',val:cur.vel,         note:'puntos completados'},
+      {label:'Carry over',        val:cur.carry,       note:'items no cerrados'},
+      {label:'Lead time',         val:cur.leadtime,    note:'días promedio'},
+      {label:'Cantidad errores',  val:cur.bugs,        note:'indicador de calidad'},
+      {label:'Incidentes',        val:cur.incidents,   note:'indicador de calidad'},
+      {label:'Rechazos QA',       val:cur.qa,          note:'indicador de calidad'},
+      {label:'Efectividad sprint',val:cur.efectividad, note:'% completado'},
+    ];
+    grid.innerHTML=fields.map(f=>`
+      <div class="p-data-cell">
+        <div class="pdc-label">${f.label}</div>
+        <div class="pdc-value">${f.val||'—'}</div>
+        <div class="pdc-note">${f.note}</div>
+      </div>`).join('');
+    if(prevDiv){
+      const prevs=[sd.prev1,sd.prev2].filter(Boolean);
+      prevDiv.innerHTML=prevs.length?`
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .5rem">Sprints anteriores</div>
+        ${prevs.map(sp=>`<div class="p-prev-row">
+          <div class="ppr-name">${sp.name}</div>
+          <div class="ppr-items">
+            <div class="ppr-item">Vel.comp. <span>${sp.velEst}</span></div>
+            <div class="ppr-item">Vel.real <span>${sp.vel}</span></div>
+            <div class="ppr-item">Carry <span>${sp.carry}</span></div>
+            <div class="ppr-item">Lead time <span>${sp.leadtime}</span></div>
+            <div class="ppr-item">Errores <span>${sp.bugs}</span></div>
+            <div class="ppr-item">QA <span>${sp.qa}</span></div>
+          </div></div>`).join('')}`:'';
+    }
+  });
+}
+
+function submitIdea(stepId){
+  const input=document.getElementById('p-idea-input');
+  const text=input?input.value.trim():'';
+  if(!text) return;
+  db.ref(sessionKey+'/ideas/'+stepId).push({text,votes:0,submittedBy:participantId,ts:Date.now()}).then(()=>{
+    if(!pIdeasSubmitted[stepId]) pIdeasSubmitted[stepId]=[];
+    pIdeasSubmitted[stepId].push(text);
+    if(input) input.value='';
+    const sentDiv=document.querySelector('.ideas-sent');
+    if(sentDiv) sentDiv.innerHTML=pIdeasSubmitted[stepId].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
+  });
+}
+
+function listenIdeasForVoting(stepId,maxVotes){
+  db.ref(sessionKey+'/ideas/'+stepId).on('value',snap=>{
+    const ideas=snap.val()||{};
+    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v}))
+      .filter(i=>i.submittedBy!==participantId)
+      .sort((a,b)=>(b.votes||0)-(a.votes||0));
+    const myVotes=pVotedIdeas[stepId]||{};
+    const usedVotes=Object.keys(myVotes).length;
+    const remaining=maxVotes-usedVotes;
+    const votesLeftEl=document.getElementById('p-votes-left');
+    if(votesLeftEl) votesLeftEl.innerHTML=`Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx. ${maxVotes})`;
+    const voteList=document.getElementById('p-ideas-vote-list');
+    if(!voteList) return;
+    if(!list.length){voteList.innerHTML='<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas de otros participantes.</div>';return;}
+    voteList.innerHTML=list.map(idea=>{
+      const isVoted=!!myVotes[idea.id];
       return `<div class="vote-idea-card ${isVoted?'voted':''}" onclick="toggleIdeaVote('${stepId}','${idea.id}',${maxVotes},${isVoted})">
         <div class="vi-text">${escapeHtml(idea.text)}</div>
-        <div class="vi-foot">
-          <span class="vi-check"></span>
-          <span>${isVoted ? 'Votado · ' : ''}${idea.votes||0} voto${(idea.votes||0)!==1?'s':''}</span>
-          ${!canVote && !isVoted ? '<span style="color:var(--muted)">— Sin votos disponibles</span>' : ''}
-        </div>
-      </div>`;
+        <div class="vi-foot"><span class="vi-check"></span>
+          <span>${isVoted?'Votado · ':''}${idea.votes||0} voto${(idea.votes||0)!==1?'s':''}</span>
+          ${!isVoted&&remaining<=0?'<span style="color:var(--muted)">Sin votos disponibles</span>':''}
+        </div></div>`;
     }).join('');
   });
 }
 
-function toggleIdeaVote(stepId, ideaId, maxVotes, isVoted) {
-  const myVotes = pVotedIdeas[stepId] || {};
-  const usedVotes = Object.keys(myVotes).length;
-  if (isVoted) {
-    // quitar voto
+function toggleIdeaVote(stepId,ideaId,maxVotes,isVoted){
+  const myVotes=pVotedIdeas[stepId]||{};
+  if(isVoted){
     delete myVotes[ideaId];
-    pVotedIdeas[stepId] = myVotes;
-    db.ref(sessionKey + '/ideas/' + stepId + '/' + ideaId + '/votes').transaction(v => Math.max(0, (v||0) - 1));
-  } else {
-    if (usedVotes >= maxVotes) return;
-    myVotes[ideaId] = true;
-    pVotedIdeas[stepId] = myVotes;
-    db.ref(sessionKey + '/ideas/' + stepId + '/' + ideaId + '/votes').transaction(v => (v||0) + 1);
+    pVotedIdeas[stepId]=myVotes;
+    db.ref(sessionKey+'/ideas/'+stepId+'/'+ideaId+'/votes').transaction(v=>Math.max(0,(v||0)-1));
+  }else{
+    if(Object.keys(myVotes).length>=maxVotes) return;
+    myVotes[ideaId]=true;
+    pVotedIdeas[stepId]=myVotes;
+    db.ref(sessionKey+'/ideas/'+stepId+'/'+ideaId+'/votes').transaction(v=>(v||0)+1);
   }
 }
 
-function renderParticipantWaiting(title, msg) {
-  document.getElementById('p-content').innerHTML = `
-    <div class="waiting-msg">
-      <div class="waiting-icon">⏳</div>
-      <h3>${title}</h3>
-      <p><span class="pulse-dot"></span>${msg}</p>
-    </div>`;
+function renderParticipantWaiting(title,msg){
+  document.getElementById('p-content').innerHTML=`
+    <div class="waiting-msg"><div class="waiting-icon">⏳</div>
+      <h3>${title}</h3><p><span class="pulse-dot"></span>${msg}</p></div>`;
+}
+function renderParticipantFinished(){
+  document.getElementById('p-content').innerHTML=`
+    <div class="waiting-msg"><div class="waiting-icon">🎉</div>
+      <h3>¡Retro completada!</h3><p>Gracias por participar. El facilitador tiene el resumen.</p></div>`;
 }
 
-function renderParticipantFinished() {
-  document.getElementById('p-content').innerHTML = `
-    <div class="waiting-msg">
-      <div class="waiting-icon">🎉</div>
-      <h3>¡Retro completada!</h3>
-      <p>Gracias por participar. El facilitador tiene el resumen.</p>
-    </div>`;
-}
+// ── UTILS ─────────────────────────────────────
+function escapeHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ─────────────────────────────────────────────
-// UTILS
-// ─────────────────────────────────────────────
-function escapeHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ─────────────────────────────────────────────
-// BOOT
-// ─────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const mode = params.get('mode');
-  if (mode === 'participant') {
-    const sk  = params.get('session');
-    const ak  = decodeURIComponent(params.get('apikey') || '');
-    const du  = decodeURIComponent(params.get('dburl')  || '');
-    if (sk && ak && du) {
-      setupParticipant(sk, ak, du);
-    } else {
-      switchScreen('participant');
-      document.getElementById('p-content').innerHTML = '<p style="color:var(--danger)">Link de acceso inválido.</p>';
-    }
-  } else {
+// ── BOOT ──────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const params=new URLSearchParams(window.location.search);
+  const mode=params.get('mode');
+  if(mode==='participant'){
+    const sk=params.get('session');
+    const ak=decodeURIComponent(params.get('apikey')||'');
+    const du=decodeURIComponent(params.get('dburl')||'');
+    if(sk&&ak&&du) setupParticipant(sk,ak,du);
+    else{switchScreen('participant');document.getElementById('p-content').innerHTML='<p style="color:var(--danger)">Link de acceso inválido.</p>';}
+  }else{
     switchScreen('config');
-    const saved = localStorage.getItem('retro_fb_config');
-    if (saved) {
-      try {
-        const cfg = JSON.parse(saved);
-        document.getElementById('fb-apikey').value = cfg.apiKey || '';
-        document.getElementById('fb-dburl').value = cfg.dbUrl || '';
-      } catch(e) {}
+    // Pre-fill saved config
+    const saved=localStorage.getItem('retro_fb_config');
+    if(saved){try{const cfg=JSON.parse(saved);document.getElementById('fb-apikey').value=cfg.apiKey||'';document.getElementById('fb-dburl').value=cfg.dbUrl||'';}catch(e){}}
+    // Pre-fill saved sprint data
+    const savedSd=localStorage.getItem('retro_sprint_data');
+    if(savedSd){
+      try{
+        const sd=JSON.parse(savedSd);
+        const cur=sd.current||{};
+        document.getElementById('sprint-name').value=cur.name||'';
+        const map={velEst:'s0-vel-est',vel:'s0-vel',carry:'s0-carry',leadtime:'s0-leadtime',bugs:'s0-bugs',incidents:'s0-incidents',qa:'s0-qa',efectividad:'s0-efectividad'};
+        Object.entries(map).forEach(([k,id])=>{if(document.getElementById(id)&&cur[k]&&cur[k]!=='—') document.getElementById(id).value=cur[k];});
+        if(sd.prev1){document.getElementById('s1-name').value=sd.prev1.name||'';const m1={velEst:'s1-vel-est',vel:'s1-vel',carry:'s1-carry',leadtime:'s1-leadtime',bugs:'s1-bugs',incidents:'s1-incidents',qa:'s1-qa',efectividad:'s1-efectividad'};Object.entries(m1).forEach(([k,id])=>{if(document.getElementById(id)&&sd.prev1[k]&&sd.prev1[k]!=='—') document.getElementById(id).value=sd.prev1[k];});}
+        if(sd.prev2){document.getElementById('s2-name').value=sd.prev2.name||'';const m2={velEst:'s2-vel-est',vel:'s2-vel',carry:'s2-carry',leadtime:'s2-leadtime',bugs:'s2-bugs',incidents:'s2-incidents',qa:'s2-qa',efectividad:'s2-efectividad'};Object.entries(m2).forEach(([k,id])=>{if(document.getElementById(id)&&sd.prev2[k]&&sd.prev2[k]!=='—') document.getElementById(id).value=sd.prev2[k];});}
+        // Update sprint label
+        document.getElementById('current-sprint-label').textContent=cur.name||'Sprint actual';
+      }catch(e){}
     }
   }
 });
