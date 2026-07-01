@@ -8,353 +8,216 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  :root {
-    --bg: #0e0f11;
-    --surface: #16181c;
-    --surface2: #1e2127;
-    --border: #2a2d35;
-    --accent: #b8f04a;
-    --accent-dim: #8abf2e;
-    --text: #f0f0ee;
-    --muted: #6b6f7a;
-    --danger: #ff6b6b;
-    --warning: #f5a623;
-    --radius: 10px;
-    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+:root {
+  --bg: #0e0f11; --surface: #16181c; --surface2: #1e2127; --border: #2a2d35;
+  --accent: #b8f04a; --accent-dim: #8abf2e; --accent-bg: rgba(184,240,74,0.07);
+  --text: #f0f0ee; --muted: #6b6f7a; --danger: #ff6b6b; --warning: #f5a623;
+  --radius: 10px; --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
 
-  /* LAYOUT */
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
-  .screen.active { display: flex; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
 
-  /* CONFIG SCREEN */
-  #config-screen { align-items: center; justify-content: center; padding: 2rem; }
-  .config-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 480px;
-  }
-  .logo { font-size: 13px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.5rem; }
-  .config-card h1 { font-size: 28px; font-weight: 700; margin-bottom: 0.25rem; }
-  .config-card h1 span { color: var(--accent); }
-  .config-card p { color: var(--muted); font-size: 14px; margin-bottom: 2rem; line-height: 1.5; }
-  label { display: block; font-size: 12px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
-  input[type="text"], input[type="password"] {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text); font-size: 14px;
-    padding: 10px 14px; outline: none; margin-bottom: 1.25rem;
-    transition: border-color 0.2s;
-  }
-  input[type="text"]:focus, input[type="password"]:focus { border-color: var(--accent); }
-  .btn-primary {
-    width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700;
-    font-size: 14px; border: none; border-radius: var(--radius); padding: 12px;
-    cursor: pointer; transition: background 0.2s;
-  }
-  .btn-primary:hover { background: var(--accent-dim); }
-  .error-msg { color: var(--danger); font-size: 13px; margin-bottom: 1rem; display: none; }
-  .config-hint {
-    margin-top: 1.5rem; padding: 12px 14px;
-    background: var(--surface2); border-radius: var(--radius);
-    font-size: 12px; color: var(--muted); line-height: 1.6;
-  }
-  .config-hint a { color: var(--accent); text-decoration: none; }
+/* ── CONFIG ── */
+#config-screen { align-items: center; justify-content: center; padding: 2rem; }
+.config-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 480px; }
+.logo { font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: .5rem; }
+.config-card h1 { font-size: 28px; font-weight: 700; margin-bottom: .25rem; }
+.config-card h1 span { color: var(--accent); }
+.config-card p { color: var(--muted); font-size: 14px; margin-bottom: 2rem; line-height: 1.5; }
+label { display: block; font-size: 12px; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+input[type=text], input[type=password] {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 14px;
+  padding: 10px 14px; outline: none; margin-bottom: 1.25rem; transition: border-color .2s;
+}
+input:focus { border-color: var(--accent); }
+.btn-primary { width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 14px; border: none; border-radius: var(--radius); padding: 12px; cursor: pointer; transition: background .2s; }
+.btn-primary:hover { background: var(--accent-dim); }
+.error-msg { color: var(--danger); font-size: 13px; margin-bottom: 1rem; display: none; }
+.config-hint { margin-top: 1.5rem; padding: 12px 14px; background: var(--surface2); border-radius: var(--radius); font-size: 12px; color: var(--muted); line-height: 1.6; }
+.config-hint a { color: var(--accent); text-decoration: none; }
 
-  /* FACILITATOR SCREEN */
-  #facilitator-screen { padding: 1.5rem; }
-  .top-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-  .top-bar .brand { font-size: 13px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
-  .top-bar .sprint-info { font-size: 13px; color: var(--muted); }
-  .btn-ghost {
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    border-radius: var(--radius); padding: 6px 12px; font-size: 13px; cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+/* ── FACILITATOR ── */
+#facilitator-screen { padding: 1.5rem; padding-bottom: 20px; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.top-bar .brand { font-size: 13px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: var(--radius); padding: 6px 12px; font-size: 13px; cursor: pointer; transition: all .2s; }
+.btn-ghost:hover { border-color: var(--text); color: var(--text); }
 
-  /* PHASE: VOTING */
-  #phase-voting { display: none; }
-  #phase-voting.active { display: block; }
-  .voting-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
-  .section-title {
-    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 1rem;
-  }
-  .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-  .topic-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 16px; cursor: default;
-    transition: border-color 0.2s;
-  }
-  .topic-card.leading { border-color: var(--accent); }
-  .topic-card .topic-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .topic-card .topic-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
-  .vote-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .vote-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
-  .topic-card.leading .vote-bar { background: var(--accent); }
-  .vote-count { font-size: 12px; color: var(--muted); margin-top: 6px; }
+/* ── PHASE VOTING ── */
+#phase-voting { display: none; }
+#phase-voting.active { display: block; }
+.voting-layout { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items: start; }
+.section-title { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+.topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
+.topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: border-color .2s; }
+.topic-card.leading { border-color: var(--accent); background: var(--accent-bg); }
+.topic-card .t-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.topic-card .t-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+.vote-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.vote-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
+.vote-count { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-  .qr-panel {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.5rem; text-align: center;
-  }
-  .qr-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 0.25rem; }
-  .qr-panel p { font-size: 12px; color: var(--muted); margin-bottom: 1.25rem; }
-  #qr-code { display: flex; justify-content: center; margin-bottom: 1.25rem; }
-  #qr-code canvas, #qr-code img { border-radius: 8px; }
-  .voter-count {
-    background: var(--surface2); border-radius: var(--radius);
-    padding: 10px; font-size: 13px; color: var(--muted); margin-bottom: 1rem;
-  }
-  .voter-count span { color: var(--accent); font-weight: 700; font-size: 18px; }
-  .btn-start-retro {
-    width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700;
-    font-size: 14px; border: none; border-radius: var(--radius); padding: 12px;
-    cursor: pointer; transition: background 0.2s, opacity 0.2s;
-  }
-  .btn-start-retro:hover { background: var(--accent-dim); }
-  .btn-start-retro:disabled { opacity: 0.4; cursor: not-allowed; }
+.side-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+.side-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: .25rem; }
+.side-panel p { font-size: 12px; color: var(--muted); margin-bottom: 1.25rem; }
+#qr-code { display: flex; justify-content: center; margin-bottom: 1.25rem; }
+.link-box { font-size: 11px; color: var(--muted); word-break: break-all; background: var(--surface2); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+.voter-count { background: var(--surface2); border-radius: var(--radius); padding: 10px; font-size: 13px; color: var(--muted); margin-bottom: 1rem; text-align: center; }
+.voter-count span { color: var(--accent); font-weight: 700; font-size: 18px; }
+.btn-accent { background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 14px; border: none; border-radius: var(--radius); padding: 10px 16px; cursor: pointer; transition: background .2s; }
+.btn-accent:hover { background: var(--accent-dim); }
+.btn-accent:disabled { opacity: .35; cursor: not-allowed; }
+.btn-accent.full { width: 100%; padding: 12px; }
+.btn-copy { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 8px; font-size: 13px; cursor: pointer; margin-bottom: 10px; transition: all .2s; }
+.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* PHASE: RETRO */
-  #phase-retro { display: none; }
-  #phase-retro.active { display: block; }
-  .retro-header {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.25rem 1.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-  .retro-header .topic-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--surface2); border: 1px solid var(--accent);
-    border-radius: 999px; padding: 6px 14px;
-    font-size: 13px; font-weight: 600; color: var(--accent);
-  }
-  .retro-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1.5rem; }
-  .step-pill {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 999px; padding: 6px 10px; text-align: center;
-    font-size: 11px; color: var(--muted); cursor: pointer; transition: all 0.2s;
-  }
-  .step-pill.active { background: var(--accent); color: #0e0f11; font-weight: 700; border-color: var(--accent); }
-  .step-pill.done { border-color: var(--accent-dim); color: var(--accent-dim); }
-  .step-content {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.75rem;
-  }
-  .step-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-  .step-header h2 { font-size: 20px; font-weight: 700; }
-  .timer-badge {
-    background: var(--surface2); border-radius: var(--radius);
-    padding: 6px 12px; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums;
-    color: var(--accent); cursor: pointer; border: 1px solid var(--border);
-    transition: all 0.2s;
-  }
-  .timer-badge.running { border-color: var(--accent); }
-  .timer-badge.expired { color: var(--danger); border-color: var(--danger); }
-  .questions-list { list-style: none; margin-bottom: 1.5rem; }
-  .questions-list li {
-    padding: 10px 14px; background: var(--surface2); border-radius: var(--radius);
-    margin-bottom: 8px; font-size: 14px; line-height: 1.5; color: var(--muted);
-    border-left: 3px solid var(--border);
-  }
-  .questions-list li.highlight { border-left-color: var(--accent); color: var(--text); }
-  .notes-area {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text); font-size: 14px;
-    padding: 12px 14px; resize: vertical; min-height: 100px; outline: none;
-    font-family: var(--font); line-height: 1.6; transition: border-color 0.2s;
-  }
-  .notes-area:focus { border-color: var(--accent); }
-  .notes-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .btn-row { display: flex; gap: 10px; margin-top: 1.25rem; }
-  .btn-secondary {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); font-size: 14px; border-radius: var(--radius);
-    padding: 10px; cursor: pointer; transition: border-color 0.2s;
-  }
-  .btn-secondary:hover { border-color: var(--text); }
-  .btn-accent {
-    flex: 1; background: var(--accent); color: #0e0f11; font-weight: 700;
-    font-size: 14px; border: none; border-radius: var(--radius);
-    padding: 10px; cursor: pointer; transition: background 0.2s;
-  }
-  .btn-accent:hover { background: var(--accent-dim); }
+/* ── PHASE RETRO ── */
+#phase-retro { display: none; }
+#phase-retro.active { display: block; }
+.retro-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.topic-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--accent); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.retro-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+.step-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 6px 8px; text-align: center; font-size: 11px; color: var(--muted); cursor: pointer; transition: all .2s; }
+.step-pill.active { background: var(--accent); color: #0e0f11; font-weight: 700; border-color: var(--accent); }
+.step-pill.done { border-color: var(--accent-dim); color: var(--accent-dim); }
 
-  /* ACTION ITEMS */
-  .action-item-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
-  .action-input {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text); font-size: 13px;
-    padding: 8px 10px; outline: none; font-family: var(--font);
-    transition: border-color 0.2s;
-  }
-  .action-input:focus { border-color: var(--accent); }
-  .action-input.owner { max-width: 140px; }
-  .btn-remove {
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    border-radius: var(--radius); padding: 8px 10px; cursor: pointer; font-size: 16px;
-    transition: all 0.2s; line-height: 1;
-  }
-  .btn-remove:hover { border-color: var(--danger); color: var(--danger); }
-  .btn-add-action {
-    background: transparent; border: 1px dashed var(--border); color: var(--muted);
-    border-radius: var(--radius); padding: 8px 14px; cursor: pointer; font-size: 13px;
-    width: 100%; transition: all 0.2s; margin-top: 4px;
-  }
-  .btn-add-action:hover { border-color: var(--accent); color: var(--accent); }
+.retro-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; align-items: start; }
+.step-content { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; }
+.step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+.step-header h2 { font-size: 20px; font-weight: 700; }
+.timer-badge { background: var(--surface2); border-radius: var(--radius); padding: 6px 12px; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); cursor: pointer; border: 1px solid var(--border); transition: all .2s; }
+.timer-badge.running { border-color: var(--accent); }
+.timer-badge.expired { color: var(--danger); border-color: var(--danger); }
 
-  /* PHASE: SUMMARY */
-  #phase-summary { display: none; }
-  #phase-summary.active { display: block; }
-  .summary-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.75rem; margin-bottom: 1.25rem;
-  }
-  .summary-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 1rem; }
-  .summary-section { margin-bottom: 1rem; }
-  .summary-section .section-label {
-    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 6px;
-  }
-  .summary-section p { font-size: 14px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
-  .ai-row { display: flex; justify-content: flex-end; margin-bottom: 1.5rem; }
-  .btn-export {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    border-radius: var(--radius); padding: 8px 16px; font-size: 13px; cursor: pointer;
-    transition: all 0.2s; margin-right: 10px;
-  }
-  .btn-export:hover { border-color: var(--accent); color: var(--accent); }
-  .action-item-summary {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-    background: var(--surface2); border-radius: var(--radius); margin-bottom: 8px;
-  }
-  .action-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-  .action-text { flex: 1; font-size: 13px; }
-  .action-owner { font-size: 12px; color: var(--muted); }
-  .action-date { font-size: 12px; color: var(--muted); }
+/* ideas / cards */
+.questions-list { list-style: none; margin-bottom: 1.25rem; }
+.questions-list li { padding: 10px 14px; background: var(--surface2); border-radius: var(--radius); margin-bottom: 8px; font-size: 14px; line-height: 1.5; color: var(--muted); border-left: 3px solid var(--border); }
+.questions-list li.hl { border-left-color: var(--accent); color: var(--text); }
 
-  /* VOTER SCREEN */
-  #voter-screen { align-items: center; justify-content: center; padding: 1.5rem; }
-  .voter-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px;
-  }
-  .voter-card .brand-small { font-size: 11px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.5rem; }
-  .voter-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 0.25rem; }
-  .voter-card p { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
-  .voter-topic-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
-  .voter-topic {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--surface2); border: 2px solid transparent;
-    border-radius: var(--radius); padding: 12px 14px; cursor: pointer;
-    transition: all 0.15s;
-  }
-  .voter-topic:hover { border-color: var(--border); }
-  .voter-topic.selected { border-color: var(--accent); background: rgba(184,240,74,0.06); }
-  .voter-topic .check {
-    width: 20px; height: 20px; border-radius: 50%;
-    border: 2px solid var(--border); flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-  }
-  .voter-topic.selected .check { background: var(--accent); border-color: var(--accent); }
-  .voter-topic .check::after { content: ''; display: none; width: 6px; height: 6px; border-radius: 50%; background: #0e0f11; }
-  .voter-topic.selected .check::after { display: block; }
-  .voter-topic .t-name { font-size: 14px; font-weight: 600; }
-  .voter-topic .t-desc { font-size: 12px; color: var(--muted); }
-  .btn-vote {
-    width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700;
-    font-size: 15px; border: none; border-radius: var(--radius); padding: 14px;
-    cursor: pointer; transition: background 0.2s, opacity 0.2s;
-  }
-  .btn-vote:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-vote:not(:disabled):hover { background: var(--accent-dim); }
-  .voted-msg { text-align: center; padding: 2rem 0; }
-  .voted-msg .check-big { font-size: 48px; margin-bottom: 1rem; }
-  .voted-msg h3 { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
-  .voted-msg p { font-size: 14px; color: var(--muted); }
+.ideas-board { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+.idea-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.idea-card.top-voted { border-color: var(--accent); background: var(--accent-bg); }
+.idea-text { flex: 1; font-size: 13px; line-height: 1.5; }
+.vote-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--muted); cursor: default; white-space: nowrap; }
+.empty-board { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 13px; }
 
-  /* HISTORY SCREEN */
-  #history-screen { padding: 1.5rem; }
-  .history-list { display: flex; flex-direction: column; gap: 10px; }
-  .history-item {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 1rem 1.25rem;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; transition: border-color 0.2s;
-  }
-  .history-item:hover { border-color: var(--muted); }
-  .history-item .hi-left h4 { font-size: 14px; font-weight: 600; }
-  .history-item .hi-left span { font-size: 12px; color: var(--muted); }
-  .history-item .hi-right { font-size: 12px; color: var(--muted); text-align: right; }
-  .history-item .topic-chip {
-    display: inline-block; background: var(--surface2);
-    border: 1px solid var(--accent); border-radius: 999px;
-    padding: 2px 10px; font-size: 11px; color: var(--accent); margin-bottom: 4px;
-  }
-  .empty-history { text-align: center; padding: 4rem 0; color: var(--muted); font-size: 14px; }
+/* action items */
+.action-item-row { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; }
+.action-item-row.top-voted { border-color: var(--accent); background: var(--accent-bg); }
+.action-rank { font-size: 12px; color: var(--accent); font-weight: 700; min-width: 20px; }
+.action-text { flex: 1; font-size: 13px; }
+.action-owner { font-size: 12px; color: var(--muted); }
 
-  /* NAV */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface); border-top: 1px solid var(--border);
-    display: flex; padding: 12px 1.5rem 20px; gap: 8px;
-    z-index: 100;
-  }
-  .nav-btn {
-    flex: 1; background: transparent; border: 1px solid var(--border);
-    color: var(--muted); border-radius: var(--radius); padding: 8px;
-    font-size: 12px; cursor: pointer; transition: all 0.2s;
-  }
-  .nav-btn.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
-  .has-nav { padding-bottom: 80px; }
+.btn-row { display: flex; gap: 10px; margin-top: 1.25rem; }
+.btn-secondary { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 14px; border-radius: var(--radius); padding: 10px; cursor: pointer; transition: border-color .2s; }
+.btn-secondary:hover { border-color: var(--text); }
+.btn-next { flex: 2; }
 
-  /* MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6); z-index: 200;
-    align-items: center; justify-content: center; padding: 1.5rem;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 440px;
-  }
-  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
-  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
+/* phase panel (right column) */
+.phase-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; }
+.phase-panel h4 { font-size: 13px; font-weight: 600; margin-bottom: .25rem; }
+.phase-panel p { font-size: 12px; color: var(--muted); margin-bottom: 1rem; line-height: 1.5; }
+.phase-status { display: flex; align-items: center; gap: 8px; background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 1rem; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.phase-status span { font-size: 12px; color: var(--muted); }
+.phase-status strong { color: var(--accent); }
 
-  /* UTILS */
-  .accent { color: var(--accent); }
-  .tag {
-    display: inline-block; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: 999px;
-    padding: 3px 10px; font-size: 11px; color: var(--muted);
-  }
-  @media (max-width: 600px) {
-    .voting-layout { grid-template-columns: 1fr; }
-    .retro-steps { grid-template-columns: repeat(5, 1fr); }
-    .step-pill { font-size: 10px; padding: 5px 4px; }
-  }
+/* ── PHASE SUMMARY ── */
+#phase-summary { display: none; }
+#phase-summary.active { display: block; }
+.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.summary-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 1rem; }
+.summary-section { margin-bottom: 1rem; }
+.summary-section .slabel { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.summary-section p { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+
+/* ── PARTICIPANT SCREEN ── */
+#participant-screen { align-items: center; justify-content: center; padding: 1.5rem; min-height: 100vh; }
+.participant-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; }
+.brand-small { font-size: 11px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.5rem; }
+
+/* voting topics (participant) */
+.p-topic-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+.p-topic { display: flex; align-items: center; gap: 12px; background: var(--surface2); border: 2px solid transparent; border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: all .15s; }
+.p-topic:hover { border-color: var(--border); }
+.p-topic.selected { border-color: var(--accent); background: var(--accent-bg); }
+.p-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.p-topic.selected .p-check { background: var(--accent); border-color: var(--accent); }
+.p-topic.selected .p-check::after { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: #0e0f11; }
+.p-topic .t-name { font-size: 14px; font-weight: 600; }
+.p-topic .t-desc { font-size: 12px; color: var(--muted); }
+.btn-vote { width: 100%; background: var(--accent); color: #0e0f11; font-weight: 700; font-size: 15px; border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: background .2s, opacity .2s; }
+.btn-vote:disabled { opacity: .35; cursor: not-allowed; }
+.btn-vote:not(:disabled):hover { background: var(--accent-dim); }
+
+/* idea input (participant) */
+.p-step-title { font-size: 18px; font-weight: 700; margin-bottom: .25rem; }
+.p-step-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
+.p-question { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; margin-bottom: 1.25rem; line-height: 1.5; }
+.p-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 14px; padding: 12px 14px; resize: vertical; min-height: 90px; outline: none; font-family: var(--font); line-height: 1.6; transition: border-color .2s; margin-bottom: 1rem; }
+.p-textarea:focus { border-color: var(--accent); }
+.ideas-sent { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+.idea-sent { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--accent-dim); }
+
+/* voting ideas (participant) */
+.vote-idea-card { background: var(--surface2); border: 2px solid transparent; border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
+.vote-idea-card:hover { border-color: var(--border); }
+.vote-idea-card.voted { border-color: var(--accent); background: var(--accent-bg); }
+.vote-idea-card .vi-text { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
+.vote-idea-card .vi-foot { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.vi-check { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border); display: inline-block; vertical-align: middle; transition: all .15s; }
+.vote-idea-card.voted .vi-check { background: var(--accent); border-color: var(--accent); }
+.votes-left { font-size: 12px; color: var(--muted); margin-bottom: 1rem; }
+.votes-left strong { color: var(--accent); }
+
+/* waiting / done states */
+.waiting-msg { text-align: center; padding: 2rem 0; }
+.waiting-icon { font-size: 40px; margin-bottom: 1rem; }
+.waiting-msg h3 { font-size: 16px; font-weight: 700; margin-bottom: .5rem; }
+.waiting-msg p { font-size: 13px; color: var(--muted); }
+.pulse-dot { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; margin-right: 6px; vertical-align: middle; }
+
+/* history */
+#history-screen { padding: 1.5rem; }
+.history-list { display: flex; flex-direction: column; gap: 10px; }
+.history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .2s; }
+.history-item:hover { border-color: var(--muted); }
+.hi-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 11px; color: var(--accent); margin-bottom: 4px; }
+.empty-state { text-align: center; padding: 4rem 0; color: var(--muted); font-size: 14px; }
+
+/* modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; align-items: center; justify-content: center; padding: 1.5rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 440px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { font-size: 18px; font-weight: 700; margin-bottom: .5rem; }
+
+@media (max-width: 700px) {
+  .voting-layout, .retro-layout { grid-template-columns: 1fr; }
+  .retro-steps { grid-template-columns: repeat(5, 1fr); }
+  .step-pill { font-size: 10px; padding: 5px 4px; }
+}
 </style>
 </head>
 <body>
 
-<!-- CONFIG SCREEN -->
+<!-- CONFIG -->
 <div id="config-screen" class="screen active">
   <div class="config-card">
     <div class="logo">Retro Engine</div>
     <h1>Configurar <span>sesión</span></h1>
-    <p>Conectá tu Firebase para habilitar la votación en tiempo real desde los dispositivos del equipo.</p>
-    <div id="config-error" class="error-msg">No se pudo conectar. Verificá las credenciales.</div>
+    <p>Conectá tu Firebase para habilitar la colaboración en tiempo real del equipo.</p>
+    <div id="config-error" class="error-msg"></div>
     <label>Firebase API Key</label>
     <input type="password" id="fb-apikey" placeholder="AIzaSy..." />
     <label>Firebase Database URL</label>
@@ -363,86 +226,93 @@
     <input type="text" id="sprint-name" placeholder="Sprint 42 — Q2 2026" />
     <button class="btn-primary" onclick="initApp()">Conectar y empezar →</button>
     <div class="config-hint">
-      ¿Primera vez? Creá un proyecto gratis en <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Realtime Database → Modo test. Copiá la API Key de Configuración del proyecto y la URL de la base de datos.
+      Gratis en <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Realtime Database → Modo test.
     </div>
   </div>
 </div>
 
-<!-- FACILITATOR SCREEN -->
-<div id="facilitator-screen" class="screen has-nav">
-  <div class="top-bar">
-    <div class="brand">Retro Engine</div>
-    <div class="sprint-info" id="sprint-label">—</div>
-    <button class="btn-ghost" onclick="showHistory()">Historial</button>
-  </div>
+<!-- FACILITATOR -->
+<div id="facilitator-screen" class="screen">
+  <div style="padding:1.5rem">
+    <div class="top-bar">
+      <div class="brand">Retro Engine</div>
+      <div style="font-size:13px;color:var(--muted)" id="f-sprint-label">—</div>
+      <button class="btn-ghost" onclick="showHistory()">Historial</button>
+    </div>
 
-  <!-- PHASE: VOTING -->
-  <div id="phase-voting" class="active">
-    <p class="section-title">Votación del tema</p>
-    <div class="voting-layout">
-      <div>
-        <div class="topic-grid" id="topic-grid"></div>
-      </div>
-      <div>
-        <div class="qr-panel">
+    <!-- VOTING PHASE -->
+    <div id="phase-voting" class="active">
+      <p class="section-title">Votación del tema</p>
+      <div class="voting-layout">
+        <div>
+          <div class="topic-grid" id="topic-grid"></div>
+        </div>
+        <div class="side-panel">
           <h3>Compartí el acceso</h3>
-          <p>Mandá el link por Slack/chat, o escaneá el QR</p>
+          <p>El equipo vota y participa desde sus celuares durante toda la retro</p>
           <div id="qr-code"></div>
-          <div id="voter-link-box" style="font-size:11px;color:var(--muted);word-break:break-all;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:10px">—</div>
-          <button class="btn-export" id="btn-copy-link" onclick="copyVoterLink()" style="width:100%;margin-right:0;margin-bottom:1rem">📋 Copiar link de votación</button>
-          <div class="voter-count">
-            <span id="voter-count-num">0</span> votos recibidos
-          </div>
-          <button class="btn-start-retro" id="btn-start" onclick="startRetro()">
-            Iniciar retrospectiva →
-          </button>
+          <div class="link-box" id="voter-link-box">—</div>
+          <button class="btn-copy" id="btn-copy" onclick="copyLink()">📋 Copiar link</button>
+          <div class="voter-count"><span id="voter-count-num">0</span> votos recibidos</div>
+          <button class="btn-accent full" id="btn-start" onclick="startRetro()" disabled>Iniciar retrospectiva →</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- PHASE: RETRO -->
-  <div id="phase-retro">
-    <div class="retro-header">
-      <div>
-        <div class="section-title" style="margin-bottom:4px">Tema elegido</div>
-        <div class="topic-badge" id="retro-topic-badge">—</div>
+    <!-- RETRO PHASE -->
+    <div id="phase-retro">
+      <div class="retro-header">
+        <div>
+          <div class="section-title" style="margin-bottom:4px">Tema</div>
+          <div class="topic-badge" id="f-topic-badge">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="section-title" style="margin-bottom:4px">Sprint</div>
+          <div style="font-size:14px" id="f-sprint-badge">—</div>
+        </div>
       </div>
-      <div style="text-align:right">
-        <div class="section-title" style="margin-bottom:4px">Sprint</div>
-        <div style="font-size:14px" id="retro-sprint-label">—</div>
+      <div class="retro-steps" id="retro-steps"></div>
+      <div class="retro-layout">
+        <div class="step-content" id="step-content"></div>
+        <div class="phase-panel" id="phase-panel">
+          <h4>Estado del equipo</h4>
+          <p>El equipo participa desde sus dispositivos</p>
+          <div class="phase-status">
+            <div class="status-dot"></div>
+            <span><strong id="live-count">0</strong> participantes activos</span>
+          </div>
+          <div id="panel-instructions" style="font-size:12px;color:var(--muted);line-height:1.6"></div>
+        </div>
       </div>
     </div>
-    <div class="retro-steps" id="retro-steps"></div>
-    <div class="step-content" id="step-content"></div>
-  </div>
 
-  <!-- PHASE: SUMMARY -->
-  <div id="phase-summary">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div>
-        <p class="section-title" style="margin-bottom:2px">Retrospectiva completada</p>
-        <h2 style="font-size:22px;font-weight:700">Resumen de la sesión</h2>
+    <!-- SUMMARY PHASE -->
+    <div id="phase-summary">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <p class="section-title" style="margin-bottom:2px">Retrospectiva completada</p>
+          <h2 style="font-size:22px;font-weight:700">Resumen de la sesión</h2>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost" onclick="exportTxt()">Exportar .txt</button>
+          <button class="btn-accent" onclick="newRetro()">Nueva retro</button>
+        </div>
       </div>
-      <div>
-        <button class="btn-export" onclick="exportSummary()">Exportar txt</button>
-        <button class="btn-accent" style="padding:8px 16px;border-radius:10px" onclick="newRetro()">Nueva retro</button>
-      </div>
+      <div id="summary-content"></div>
     </div>
-    <div id="summary-content"></div>
   </div>
 </div>
 
-<!-- VOTER SCREEN -->
-<div id="voter-screen" class="screen">
-  <div class="voter-card">
-    <div class="brand-small">Retro Engine — Votación</div>
-    <div id="voter-content"></div>
+<!-- PARTICIPANT -->
+<div id="participant-screen" class="screen">
+  <div class="participant-card">
+    <div class="brand-small">Retro Engine — Participante</div>
+    <div id="p-content"></div>
   </div>
 </div>
 
-<!-- HISTORY SCREEN -->
-<div id="history-screen" class="screen has-nav" style="display:none">
+<!-- HISTORY -->
+<div id="history-screen" class="screen" style="padding:1.5rem">
   <div class="top-bar">
     <div class="brand">Historial</div>
     <button class="btn-ghost" onclick="backToFacilitator()">← Volver</button>
@@ -450,77 +320,86 @@
   <div id="history-list" class="history-list"></div>
 </div>
 
-<!-- MODAL history detail -->
-<div class="modal-overlay" id="modal-history">
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
   <div class="modal">
     <h3 id="modal-title">—</h3>
-    <p id="modal-meta" style="margin-bottom:1rem"></p>
+    <p id="modal-meta" style="color:var(--muted);font-size:13px;margin-bottom:1rem"></p>
     <div id="modal-body"></div>
-    <div class="btn-row" style="margin-top:1.25rem">
-      <button class="btn-secondary" onclick="closeModal()">Cerrar</button>
+    <div style="margin-top:1.25rem">
+      <button class="btn-secondary" style="width:100%" onclick="closeModal()">Cerrar</button>
     </div>
   </div>
 </div>
 
-<!-- BOTTOM NAV (facilitator) -->
-<div class="bottom-nav" id="bottom-nav" style="display:none">
-  <button class="nav-btn active" id="nav-retro" onclick="navTo('retro')">Retro activa</button>
-  <button class="nav-btn" id="nav-history" onclick="navTo('history')">Historial</button>
-</div>
-
 <script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
 const TOPICS = [
-  { id:'delays',    name:'Delays',            desc:'Bloqueos y demoras del sprint',       icon:'⏱' },
-  { id:'metricas',  name:'Métricas',           desc:'Velocity, burndown, tendencias',      icon:'📊' },
-  { id:'cliente',   name:'Pedidos del cliente',desc:'Feedback y solicitudes externas',     icon:'💬' },
-  { id:'calidad',   name:'Calidad',            desc:'Bugs, deuda técnica, testing',        icon:'🔍' },
-  { id:'ciclos',    name:'Ciclos de trabajo',  desc:'Flujo, cuellos de botella, WIP',      icon:'🔄' },
-  { id:'acuerdos',  name:'Acuerdos de equipo', desc:'Normas, compromisos, team agreements',icon:'🤝' },
-  { id:'carryover', name:'Carry over',         desc:'Tareas no cerradas, arrastre',        icon:'↩' },
-  { id:'energia',   name:'Energía del equipo', desc:'Motivación, clima, comunicación',     icon:'⚡' },
-  { id:'deuda',     name:'Deuda técnica',      desc:'Refactors pendientes, arquitectura',  icon:'🔧' },
-  { id:'discovery', name:'Discovery',          desc:'Ideas, experimentos, backlog',        icon:'💡' },
+  { id:'delays',    name:'Delays',             desc:'Bloqueos y demoras del sprint',        icon:'⏱' },
+  { id:'metricas',  name:'Métricas',            desc:'Velocity, burndown, tendencias',       icon:'📊' },
+  { id:'cliente',   name:'Pedidos del cliente', desc:'Feedback y solicitudes externas',      icon:'💬' },
+  { id:'calidad',   name:'Calidad',             desc:'Bugs, deuda técnica, testing',         icon:'🔍' },
+  { id:'ciclos',    name:'Ciclos de trabajo',   desc:'Flujo, cuellos de botella, WIP',       icon:'🔄' },
+  { id:'acuerdos',  name:'Acuerdos de equipo',  desc:'Normas, compromisos, team agreements', icon:'🤝' },
+  { id:'carryover', name:'Carry over',          desc:'Tareas no cerradas, arrastre',         icon:'↩' },
+  { id:'energia',   name:'Energía del equipo',  desc:'Motivación, clima, comunicación',      icon:'⚡' },
+  { id:'deuda',     name:'Deuda técnica',       desc:'Refactors pendientes, arquitectura',   icon:'🔧' },
+  { id:'discovery', name:'Discovery',           desc:'Ideas, experimentos, backlog',         icon:'💡' },
 ];
 
 const STEPS = [
-  { id:'checkin',   name:'Check-in',    mins:3  },
-  { id:'datos',     name:'Datos',       mins:5  },
-  { id:'explora',   name:'Exploración', mins:15 },
-  { id:'insights',  name:'Insights',    mins:5  },
-  { id:'acciones',  name:'Acciones',    mins:10 },
+  { id:'checkin',  name:'Check-in',    mins:3,  maxVotes:1 },
+  { id:'datos',    name:'Datos',       mins:5,  maxVotes:1 },
+  { id:'explora',  name:'Exploración', mins:15, maxVotes:3 },
+  { id:'insights', name:'Insights',    mins:5,  maxVotes:2 },
+  { id:'acciones', name:'Acciones',    mins:10, maxVotes:2 },
 ];
 
-const TOPIC_QUESTIONS = {
-  delays:    ['¿Qué bloqueó al equipo más tiempo esta semana?','¿Era previsible? ¿Teníamos señales?','¿Qué cambio concreto puede reducir este bloqueo?','¿Dependencias externas que debemos gestionar?'],
-  metricas:  ['¿Cómo cerró el velocity vs. la estimación?','¿Qué explica la diferencia?','¿Hay alguna métrica que nos está mintiendo?','¿Qué métrica nueva agregaríamos?'],
-  cliente:   ['¿Qué pedido del cliente nos tomó más por sorpresa?','¿Estamos alineados en expectativas con el cliente?','¿Qué feedback recurrente estamos ignorando?','¿Cómo mejoramos el canal de comunicación?'],
-  calidad:   ['¿Qué llegó a prod que no debería?','¿Dónde falló la definición de "listo"?','¿Qué tipo de bug vemos repetirse?','¿Dónde necesitamos más testing o revisión?'],
-  ciclos:    ['¿Dónde se atasca el trabajo antes de "en progreso"?','¿Hay tareas que estuvieron días sin moverse?','¿El WIP fue razonable o nos fragmentamos?','¿Qué cambiamos en el flujo del próximo sprint?'],
-  acuerdos:  ['¿Qué acuerdo de equipo rompimos o ignoramos?','¿Sigue siendo válido ese acuerdo hoy?','¿Necesitamos crear un acuerdo nuevo?','¿Cómo hacemos los acuerdos más visibles?'],
-  carryover: ['¿Qué tareas arrastramos y por qué no cerraron?','¿Era un problema de tamaño, bloqueo o foco?','¿Cómo mejoramos la estimación para evitarlo?','¿El carry over fue una excepción o una tendencia?'],
-  energia:   ['¿Cómo está la energía del equipo en este momento?','¿Hay algo que drena motivación que podemos cambiar?','¿Hubo algún momento de orgullo del sprint que celebrar?','¿Qué necesita el equipo para estar en su mejor versión?'],
-  deuda:     ['¿Qué deuda técnica nos frenó este sprint?','¿Tenemos visibilidad de toda la deuda acumulada?','¿Qué refactor tiene más impacto si lo hacemos ahora?','¿Cómo hacemos espacio para atenderla sin parar el delivery?'],
-  discovery: ['¿Qué idea del sprint merece ser explorada?','¿Hay hipótesis que nunca llegamos a validar?','¿El backlog refleja lo que el usuario realmente necesita?','¿Qué experimento haríamos si tuviéramos un día libre?'],
+const STEP_PROMPTS = {
+  checkin:  { title:'Check-in', sub:'¿Con una palabra, cómo llegás a esta retro?', questions:['¿Cómo llegás a esta retro (una palabra)?','¿Hay algo que querés dejar afuera antes de empezar?'] },
+  datos:    { title:'Datos del sprint', sub:'Compartí un dato o número relevante del sprint', questions:['¿Cuántos puntos completamos?','¿Cuánto carry over hubo?','¿Bugs o incidents en prod?','¿Algún dato que te llamó la atención?'] },
+  explora:  { title:'Exploración', sub:'Aportá tus ideas sobre el tema del sprint' },
+  insights: { title:'Insights', sub:'¿Cuál es el aprendizaje más importante del sprint?' },
+  acciones: { title:'Acciones', sub:'¿Qué acción concreta proponés para el próximo sprint? Agregá quién podría ser responsable.' },
 };
 
-let db, sessionKey, sprintName, selectedTopic, currentStep=0, timerInterval=null, timerSecs=0;
-let retroData = { notes:{}, actions:[] };
-let isVoterMode = false;
+const TOPIC_QUESTIONS = {
+  delays:    ['¿Qué bloqueó más al equipo esta semana?','¿Era previsible? ¿Teníamos señales?','¿Qué cambio concreto puede reducir este bloqueo?','¿Dependencias externas que debemos gestionar?'],
+  metricas:  ['¿Cómo cerró el velocity vs. estimación?','¿Qué explica la diferencia?','¿Hay alguna métrica que nos está mintiendo?','¿Qué métrica nueva agregaríamos?'],
+  cliente:   ['¿Qué pedido del cliente nos tomó más por sorpresa?','¿Estamos alineados en expectativas?','¿Qué feedback recurrente estamos ignorando?','¿Cómo mejoramos el canal de comunicación?'],
+  calidad:   ['¿Qué llegó a prod que no debería?','¿Dónde falló la definición de listo?','¿Qué tipo de bug se repite?','¿Dónde necesitamos más testing?'],
+  ciclos:    ['¿Dónde se atasca el trabajo antes de "en progreso"?','¿Hay tareas que estuvieron días sin moverse?','¿El WIP fue razonable?','¿Qué cambiamos en el flujo del próximo sprint?'],
+  acuerdos:  ['¿Qué acuerdo de equipo rompimos o ignoramos?','¿Sigue siendo válido ese acuerdo hoy?','¿Necesitamos crear un acuerdo nuevo?','¿Cómo hacemos los acuerdos más visibles?'],
+  carryover: ['¿Qué tareas arrastramos y por qué no cerraron?','¿Era un problema de tamaño, bloqueo o foco?','¿Cómo mejoramos la estimación para evitarlo?','¿El carry over fue una excepción o una tendencia?'],
+  energia:   ['¿Cómo está la energía del equipo ahora mismo?','¿Hay algo que drena motivación?','¿Hubo algún momento de orgullo del sprint?','¿Qué necesita el equipo para estar en su mejor versión?'],
+  deuda:     ['¿Qué deuda técnica nos frenó este sprint?','¿Tenemos visibilidad de toda la deuda?','¿Qué refactor tiene más impacto ahora?','¿Cómo hacemos espacio para atenderla?'],
+  discovery: ['¿Qué idea del sprint merece explorarse?','¿Hay hipótesis que nunca validamos?','¿El backlog refleja lo que el usuario necesita?','¿Qué experimento haríamos si tuviéramos un día libre?'],
+};
 
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let db, sessionKey, sprintName, selectedTopic;
+let currentStep = 0;
+let timerInterval = null, timerSecs = 0;
+let isParticipant = false;
+let participantId = null;
+let retroData = {};
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
 function initApp() {
   const apiKey = document.getElementById('fb-apikey').value.trim();
   const dbUrl  = document.getElementById('fb-dburl').value.trim();
   sprintName   = document.getElementById('sprint-name').value.trim() || 'Sprint';
-  if (!apiKey || !dbUrl) { showError('Completá todos los campos.'); return; }
+  if (!apiKey || !dbUrl) { showCfgError('Completá todos los campos.'); return; }
   try {
-    if (firebase.apps.length) {
-      firebase.app().delete().then(() => doInit(apiKey, dbUrl));
-    } else {
-      doInit(apiKey, dbUrl);
-    }
-  } catch(e) {
-    showError('Error al inicializar Firebase: ' + e.message);
-  }
+    if (firebase.apps.length) firebase.app().delete().then(() => doInit(apiKey, dbUrl));
+    else doInit(apiKey, dbUrl);
+  } catch(e) { showCfgError('Error: ' + e.message); }
 }
 
 function doInit(apiKey, dbUrl) {
@@ -528,60 +407,55 @@ function doInit(apiKey, dbUrl) {
     firebase.initializeApp({ apiKey, databaseURL: dbUrl });
     db = firebase.database();
     sessionKey = 'retro_' + Date.now();
-    // Guardamos las credenciales en localStorage para no tener que repetirlas la próxima vez
     localStorage.setItem('retro_fb_config', JSON.stringify({ apiKey, dbUrl }));
-    // Test real: escribimos y leemos un valor de prueba
     db.ref(sessionKey + '/_test').set(Date.now())
       .then(() => db.ref(sessionKey + '/_test').once('value'))
       .then(snap => {
-        if (snap.exists()) {
-          // Guardamos también la config DENTRO de la sesión, así el votante
-          // solo necesita el sessionKey en el link (no api keys largas en la URL)
-          return db.ref(sessionKey + '/_config').set({ apiKey, dbUrl });
-        } else {
-          throw { customMsg: 'Conectó pero no pudo leer datos. Revisá las reglas de la base (modo prueba).' };
-        }
-      })
-      .then(() => {
+        if (!snap.exists()) throw { msg: 'No se pudo leer. Revisá el modo prueba en Firebase.' };
         switchScreen('facilitator');
         setupFacilitator();
       })
       .catch(err => {
-        console.error('Firebase error:', err);
-        if (err.customMsg) showError(err.customMsg);
-        else if (err.code === 'PERMISSION_DENIED') {
-          showError('Permiso denegado. Verificá que la base esté en "Modo de prueba" (Realtime Database → Reglas).');
-        } else if (err.message && err.message.includes('Invalid')) {
-          showError('Database URL inválida. Debe terminar en .firebaseio.com (copiala completa, con https://).');
-        } else {
-          showError('Error: ' + (err.message || err));
-        }
+        if (err.msg) showCfgError(err.msg);
+        else if (err.code === 'PERMISSION_DENIED') showCfgError('Permiso denegado. Asegurate de estar en "Modo de prueba" en Firebase.');
+        else showCfgError('Error: ' + (err.message || err));
       });
-  } catch(e) {
-    console.error('Init error:', e);
-    showError('API Key inválida o mal copiada. Revisá que no tenga espacios extra.');
-  }
+  } catch(e) { showCfgError('API Key inválida. Revisá que no tenga espacios extra.'); }
 }
 
-function showError(msg) {
+function showCfgError(msg) {
   const el = document.getElementById('config-error');
-  el.textContent = msg;
-  el.style.display = 'block';
+  el.textContent = msg; el.style.display = 'block';
 }
 
+// ─────────────────────────────────────────────
+// SCREEN ROUTING
+// ─────────────────────────────────────────────
 function switchScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const screens = { config:'config-screen', facilitator:'facilitator-screen', voter:'voter-screen', history:'history-screen' };
-  const target = document.getElementById(screens[name]);
-  if (target) { target.style.display = 'flex'; target.classList.add('active'); }
-  document.getElementById('bottom-nav').style.display = (name === 'facilitator') ? 'flex' : 'none';
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
+  const map = { config:'config-screen', facilitator:'facilitator-screen', participant:'participant-screen', history:'history-screen' };
+  const el = document.getElementById(map[name]);
+  if (el) { el.style.display = 'flex'; el.classList.add('active'); }
 }
 
+function showPhase(name) {
+  ['voting','retro','summary'].forEach(p => {
+    const el = document.getElementById('phase-' + p);
+    if (el) { el.classList.remove('active'); el.style.display = ''; }
+  });
+  const target = document.getElementById('phase-' + name);
+  if (target) { target.style.display = 'block'; setTimeout(() => target.classList.add('active'), 10); }
+}
+
+// ─────────────────────────────────────────────
+// FACILITATOR SETUP
+// ─────────────────────────────────────────────
 function setupFacilitator() {
-  document.getElementById('sprint-label').textContent = sprintName;
+  document.getElementById('f-sprint-label').textContent = sprintName;
   renderTopicGrid();
   generateQR();
   listenVotes();
+  listenParticipants();
 }
 
 function renderTopicGrid() {
@@ -591,38 +465,35 @@ function renderTopicGrid() {
     const card = document.createElement('div');
     card.className = 'topic-card';
     card.id = 'topic-' + t.id;
-    card.innerHTML = `
-      <div class="topic-name">${t.icon} ${t.name}</div>
-      <div class="topic-desc">${t.desc}</div>
+    card.innerHTML = `<div class="t-name">${t.icon} ${t.name}</div>
+      <div class="t-desc">${t.desc}</div>
       <div class="vote-bar-wrap"><div class="vote-bar" id="bar-${t.id}"></div></div>
-      <div class="vote-count" id="count-${t.id}">0 votos</div>`;
+      <div class="vote-count" id="cnt-${t.id}">0 votos</div>`;
     grid.appendChild(card);
   });
 }
 
 function generateQR() {
   const baseUrl = window.location.origin + window.location.pathname;
-  const apiKey = document.getElementById('fb-apikey').value.trim();
-  const dbUrl = document.getElementById('fb-dburl').value.trim();
-  const voterUrl = baseUrl + '?session=' + sessionKey + '&mode=voter&apikey=' + encodeURIComponent(apiKey) + '&dburl=' + encodeURIComponent(dbUrl);
+  const apiKey  = document.getElementById('fb-apikey').value.trim();
+  const dbUrl   = document.getElementById('fb-dburl').value.trim();
+  const url = baseUrl + '?session=' + sessionKey + '&mode=participant&apikey=' + encodeURIComponent(apiKey) + '&dburl=' + encodeURIComponent(dbUrl);
   document.getElementById('qr-code').innerHTML = '';
   new QRCode(document.getElementById('qr-code'), {
-    text: voterUrl, width: 160, height: 160,
+    text: url, width: 148, height: 148,
     colorDark: '#f0f0ee', colorLight: '#1e2127',
     correctLevel: QRCode.CorrectLevel.M
   });
-  const linkBox = document.getElementById('voter-link-box');
-  if (linkBox) linkBox.textContent = voterUrl;
-  window._voterUrl = voterUrl;
+  document.getElementById('voter-link-box').textContent = url;
+  window._participantUrl = url;
 }
 
-function copyVoterLink() {
-  if (!window._voterUrl) return;
-  navigator.clipboard.writeText(window._voterUrl).then(() => {
-    const btn = document.getElementById('btn-copy-link');
-    const original = btn.textContent;
+function copyLink() {
+  if (!window._participantUrl) return;
+  navigator.clipboard.writeText(window._participantUrl).then(() => {
+    const btn = document.getElementById('btn-copy');
     btn.textContent = '✓ Copiado';
-    setTimeout(() => { btn.textContent = original; }, 1800);
+    setTimeout(() => btn.textContent = '📋 Copiar link', 1800);
   });
 }
 
@@ -631,47 +502,47 @@ function listenVotes() {
     const votes = snap.val() || {};
     const counts = {};
     TOPICS.forEach(t => counts[t.id] = 0);
-    Object.values(votes).forEach(userVotes => {
-      if (Array.isArray(userVotes)) userVotes.forEach(tid => { if(counts[tid]!==undefined) counts[tid]++; });
+    Object.values(votes).forEach(uv => {
+      if (Array.isArray(uv)) uv.forEach(tid => { if (counts[tid] !== undefined) counts[tid]++; });
     });
-    const totalVoters = Object.keys(votes).length;
-    const maxVotes = Math.max(...Object.values(counts), 1);
+    const total = Object.keys(votes).length;
+    const max = Math.max(...Object.values(counts), 1);
     TOPICS.forEach(t => {
       const bar = document.getElementById('bar-' + t.id);
-      const cnt = document.getElementById('count-' + t.id);
+      const cnt = document.getElementById('cnt-' + t.id);
       const card = document.getElementById('topic-' + t.id);
-      if (bar) bar.style.width = (counts[t.id] / maxVotes * 100) + '%';
-      if (cnt) cnt.textContent = counts[t.id] + ' voto' + (counts[t.id]!==1?'s':'');
-      if (card) card.classList.toggle('leading', counts[t.id] === maxVotes && counts[t.id] > 0);
+      if (bar) bar.style.width = (counts[t.id] / max * 100) + '%';
+      if (cnt) cnt.textContent = counts[t.id] + ' voto' + (counts[t.id] !== 1 ? 's' : '');
+      if (card) card.classList.toggle('leading', counts[t.id] === max && counts[t.id] > 0);
     });
-    document.getElementById('voter-count-num').textContent = totalVoters;
-    // find leading topic
-    const leading = TOPICS.reduce((a,b) => counts[a.id]>=counts[b.id]?a:b);
+    document.getElementById('voter-count-num').textContent = total;
+    const leading = TOPICS.reduce((a, b) => counts[a.id] >= counts[b.id] ? a : b);
     selectedTopic = counts[leading.id] > 0 ? leading : null;
     document.getElementById('btn-start').disabled = !selectedTopic;
   });
 }
 
-function startRetro() {
-  if (!selectedTopic) return;
-  showPhase('retro');
-  document.getElementById('retro-topic-badge').textContent = selectedTopic.icon + ' ' + selectedTopic.name;
-  document.getElementById('retro-sprint-label').textContent = sprintName;
-  currentStep = 0;
-  retroData = { topic: selectedTopic.id, sprint: sprintName, date: new Date().toLocaleDateString('es-UY'), notes:{}, actions:[] };
-  renderStepNav();
-  renderStep(0);
+function listenParticipants() {
+  db.ref(sessionKey + '/participants').on('value', snap => {
+    const n = snap.numChildren();
+    const el = document.getElementById('live-count');
+    if (el) el.textContent = n;
+  });
 }
 
-function showPhase(name) {
-  ['voting','retro','summary'].forEach(p => {
-    const el = document.getElementById('phase-' + p);
-    el.classList.remove('active');
-    el.style.display = 'none';
-  });
-  const target = document.getElementById('phase-' + name);
-  target.style.display = 'block';
-  setTimeout(() => target.classList.add('active'), 10);
+// ─────────────────────────────────────────────
+// RETRO FLOW — FACILITATOR
+// ─────────────────────────────────────────────
+function startRetro() {
+  if (!selectedTopic) return;
+  retroData = { topic: selectedTopic.id, sprint: sprintName, date: new Date().toLocaleDateString('es-UY'), steps: {} };
+  db.ref(sessionKey + '/phase').set({ name: 'retro', step: 0, topic: selectedTopic.id });
+  document.getElementById('f-topic-badge').textContent = selectedTopic.icon + ' ' + selectedTopic.name;
+  document.getElementById('f-sprint-badge').textContent = sprintName;
+  currentStep = 0;
+  showPhase('retro');
+  renderStepNav();
+  renderFacilitatorStep(0);
 }
 
 function renderStepNav() {
@@ -679,239 +550,201 @@ function renderStepNav() {
   container.innerHTML = '';
   STEPS.forEach((s, i) => {
     const pill = document.createElement('div');
-    pill.className = 'step-pill' + (i===currentStep?' active':'') + (i<currentStep?' done':'');
+    pill.className = 'step-pill' + (i === currentStep ? ' active' : '') + (i < currentStep ? ' done' : '');
     pill.textContent = s.name;
-    pill.onclick = () => saveCurrentStep() || renderStep(i);
+    pill.onclick = () => goToStep(i);
     container.appendChild(pill);
   });
 }
 
-function renderStep(idx) {
-  stopTimer();
+function goToStep(idx) {
   currentStep = idx;
+  db.ref(sessionKey + '/phase').set({ name: 'retro', step: idx, topic: selectedTopic.id });
   renderStepNav();
+  renderFacilitatorStep(idx);
+  stopTimer();
+}
+
+function renderFacilitatorStep(idx) {
+  stopTimer();
   const step = STEPS[idx];
-  const topic = selectedTopic;
-  const container = document.getElementById('step-content');
+  const content = document.getElementById('step-content');
   timerSecs = step.mins * 60;
+
+  let questions = [];
+  if (idx === 2 && selectedTopic) questions = TOPIC_QUESTIONS[selectedTopic.id] || [];
+  else if (STEP_PROMPTS[step.id]) questions = STEP_PROMPTS[step.id].questions || [];
 
   let html = `<div class="step-header">
     <h2>${step.name}</h2>
     <div class="timer-badge" id="timer" onclick="toggleTimer()">${formatTime(timerSecs)}</div>
   </div>`;
 
-  if (idx === 0) { // Check-in
-    html += `<ul class="questions-list">
-      <li class="highlight">¿Con una palabra, ¿cómo llegás a esta retro?</li>
-      <li>¿Hay algo que querés dejar afuera antes de empezar?</li>
-    </ul>
-    <p class="notes-label">Notas del check-in</p>
-    <textarea class="notes-area" id="step-notes" placeholder="Ej: energía variada, mayoría concentrada...">${retroData.notes['checkin']||''}</textarea>`;
-  } else if (idx === 1) { // Datos
-    html += `<ul class="questions-list">
-      <li class="highlight">¿Cuántos puntos completamos vs. planeados?</li>
-      <li>¿Cuántas tareas en carry over?</li>
-      <li>¿Incidents o bugs en producción?</li>
-    </ul>
-    <p class="notes-label">Datos del sprint</p>
-    <textarea class="notes-area" id="step-notes" placeholder="Velocity: X / Carry over: Y / Bugs: Z...">${retroData.notes['datos']||''}</textarea>`;
-  } else if (idx === 2) { // Exploración
-    const qs = TOPIC_QUESTIONS[topic.id] || ['¿Qué salió bien?','¿Qué mejoraríamos?','¿Qué haremos diferente?'];
-    html += `<ul class="questions-list">
-      ${qs.map((q,i) => `<li ${i===0?'class="highlight"':''}>${q}</li>`).join('')}
-    </ul>
-    <p class="notes-label">Notas de la exploración</p>
-    <textarea class="notes-area" id="step-notes" placeholder="Capturas del equipo..." style="min-height:140px">${retroData.notes['explora']||''}</textarea>`;
-  } else if (idx === 3) { // Insights
-    html += `<ul class="questions-list">
-      <li class="highlight">¿Cuál es el patrón que se repite?</li>
-      <li>¿Qué aprendimos sobre cómo trabajamos?</li>
-      <li>¿Qué queremos recordar del próximo sprint?</li>
-    </ul>
-    <p class="notes-label">Insights clave</p>
-    <textarea class="notes-area" id="step-notes" placeholder="Los 2 o 3 insights más importantes...">${retroData.notes['insights']||''}</textarea>`;
-  } else if (idx === 4) { // Acciones
-    html += `<p class="notes-label">Action items — con responsable</p>
-    <div id="actions-container">${renderActions()}</div>
-    <button class="btn-add-action" onclick="addAction()">+ Agregar acción</button>`;
+  if (questions.length) {
+    html += `<ul class="questions-list">${questions.map((q,i) => `<li ${i===0?'class="hl"':''}>${q}</li>`).join('')}</ul>`;
   }
 
-  if (idx < STEPS.length - 1) {
-    html += `<div class="btn-row">
-      ${idx>0?`<button class="btn-secondary" onclick="navStep(-1)">← Anterior</button>`:''}
-      <button class="btn-accent" onclick="navStep(1)">Siguiente →</button>
-    </div>`;
-  } else {
-    html += `<div class="btn-row">
-      <button class="btn-secondary" onclick="navStep(-1)">← Anterior</button>
-      <button class="btn-accent" onclick="finishRetro()">Finalizar retro ✓</button>
-    </div>`;
-  }
+  html += `<p class="section-title" style="margin-bottom:8px">Ideas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+    <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando aportes del equipo...</div></div>`;
 
-  container.innerHTML = html;
+  const isLast = idx === STEPS.length - 1;
+  html += `<div class="btn-row" style="margin-top:1.5rem">
+    ${idx > 0 ? `<button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>` : ''}
+    ${!isLast
+      ? `<button class="btn-accent btn-next" onclick="goToStep(${idx+1})">Siguiente paso →</button>`
+      : `<button class="btn-accent btn-next" onclick="finishRetro()">Finalizar retro ✓</button>`}
+  </div>`;
+
+  content.innerHTML = html;
+
+  // Update side panel instructions
+  const instructions = {
+    checkin:  'El equipo está escribiendo su check-in. Podés leer algunas en voz alta para abrir la sesión.',
+    datos:    'El equipo comparte datos del sprint. Usá los números como punto de partida.',
+    explora:  'El equipo aporta ideas. Cuando terminen de escribir, invitalos a votar las más importantes.',
+    insights: 'El equipo vota los insights más relevantes. Los más votados quedan arriba.',
+    acciones: 'El equipo propone y vota acciones concretas. Los más votados son los compromisos del sprint.',
+  };
+  const panel = document.getElementById('panel-instructions');
+  if (panel) panel.textContent = instructions[step.id] || '';
+
+  listenIdeas(step.id, step.maxVotes);
   startTimer();
 }
 
-function renderActions() {
-  if (!retroData.actions.length) retroData.actions = [{ text:'', owner:'', date:'' }];
-  return retroData.actions.map((a,i) => `
-    <div class="action-item-row" id="action-row-${i}">
-      <input type="text" class="action-input" placeholder="Acción concreta..." value="${a.text||''}" oninput="retroData.actions[${i}].text=this.value" />
-      <input type="text" class="action-input owner" placeholder="Responsable" value="${a.owner||''}" oninput="retroData.actions[${i}].owner=this.value" />
-      <button class="btn-remove" onclick="removeAction(${i})">×</button>
-    </div>`).join('');
-}
-
-function addAction() {
-  saveActionsState();
-  retroData.actions.push({ text:'', owner:'', date:'' });
-  document.getElementById('actions-container').innerHTML = renderActions();
-}
-
-function removeAction(i) {
-  saveActionsState();
-  retroData.actions.splice(i,1);
-  if (!retroData.actions.length) retroData.actions = [{ text:'', owner:'', date:'' }];
-  document.getElementById('actions-container').innerHTML = renderActions();
-}
-
-function saveActionsState() {
-  retroData.actions.forEach((a,i) => {
-    const textEl = document.querySelector(`#action-row-${i} input`);
-    const ownerEl = document.querySelector(`#action-row-${i} .owner`);
-    if (textEl) a.text = textEl.value;
-    if (ownerEl) a.owner = ownerEl.value;
+function listenIdeas(stepId, maxVotes) {
+  db.ref(sessionKey + '/ideas/' + stepId).on('value', snap => {
+    const ideas = snap.val() || {};
+    const board = document.getElementById('ideas-board');
+    if (!board) return;
+    const list = Object.entries(ideas)
+      .map(([k, v]) => ({ id: k, ...v }))
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+    const count = document.getElementById('idea-count');
+    if (count) count.textContent = list.length ? `(${list.length})` : '';
+    if (!list.length) { board.innerHTML = '<div class="empty-board">Esperando aportes del equipo...</div>'; return; }
+    const topVotes = list[0].votes || 0;
+    board.innerHTML = list.map(idea => `
+      <div class="idea-card ${idea.votes === topVotes && topVotes > 0 ? 'top-voted' : ''}">
+        <div class="idea-text">${escapeHtml(idea.text)}</div>
+        <div class="vote-btn">👍 ${idea.votes || 0}</div>
+      </div>`).join('');
+    // save to retroData
+    if (!retroData.steps) retroData.steps = {};
+    retroData.steps[stepId] = list;
   });
 }
 
-function saveCurrentStep() {
-  if (currentStep < 4) {
-    const notesEl = document.getElementById('step-notes');
-    if (notesEl) retroData.notes[STEPS[currentStep].id] = notesEl.value;
-  } else {
-    saveActionsState();
-  }
-}
-
-function navStep(dir) {
-  saveCurrentStep();
-  renderStep(currentStep + dir);
-}
-
-function startTimer() {
-  updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    timerSecs--;
-    updateTimerDisplay();
-    if (timerSecs <= 0) { stopTimer(); document.getElementById('timer').classList.add('expired'); }
-  }, 1000);
-  document.getElementById('timer').classList.add('running');
-}
-
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-
-function toggleTimer() {
-  if (timerInterval) { stopTimer(); document.getElementById('timer').classList.remove('running'); }
-  else { startTimer(); }
-}
-
-function updateTimerDisplay() {
-  const el = document.getElementById('timer');
-  if (el) el.textContent = formatTime(timerSecs);
-}
-
-function formatTime(s) {
-  const m = Math.floor(Math.abs(s)/60), sec = Math.abs(s)%60;
-  return (s<0?'-':'') + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-}
-
+// ─────────────────────────────────────────────
+// FINISH & SUMMARY
+// ─────────────────────────────────────────────
 function finishRetro() {
-  saveCurrentStep();
   stopTimer();
+  db.ref(sessionKey + '/phase').set({ name: 'finished' });
   const record = { ...retroData, savedAt: Date.now() };
-  // Save to localStorage
-  const history = JSON.parse(localStorage.getItem('retro_history')||'[]');
+  const history = JSON.parse(localStorage.getItem('retro_history') || '[]');
   history.unshift(record);
-  localStorage.setItem('retro_history', JSON.stringify(history.slice(0,20)));
-  // Show summary
+  localStorage.setItem('retro_history', JSON.stringify(history.slice(0, 20)));
   showPhase('summary');
   renderSummary(record);
 }
 
 function renderSummary(record) {
-  const topic = TOPICS.find(t=>t.id===record.topic);
+  const topic = TOPICS.find(t => t.id === record.topic);
   let html = `<div class="summary-card">
-    <h3>${topic?topic.icon+' '+topic.name:'Retro'} — ${record.sprint}</h3>
-    <div class="summary-section">
-      <div class="section-label">Fecha</div>
-      <p>${record.date}</p>
-    </div>`;
-  STEPS.slice(0,4).forEach(s => {
-    if (record.notes[s.id]) html += `<div class="summary-section">
-      <div class="section-label">${s.name}</div>
-      <p>${record.notes[s.id]}</p>
-    </div>`;
+    <h3>${topic ? topic.icon + ' ' + topic.name : 'Retro'} — ${record.sprint}</h3>
+    <div class="summary-section"><div class="slabel">Fecha</div><p>${record.date}</p></div>`;
+  STEPS.forEach(s => {
+    const ideas = record.steps && record.steps[s.id];
+    if (ideas && ideas.length) {
+      html += `<div class="summary-section"><div class="slabel">${s.name}</div>`;
+      ideas.slice(0, 5).forEach((idea, i) => {
+        html += `<div class="action-item-row ${i===0?'top-voted':''}">
+          <div class="action-rank">${idea.votes||0}👍</div>
+          <div class="action-text">${escapeHtml(idea.text)}</div>
+          ${idea.owner ? `<div class="action-owner">${escapeHtml(idea.owner)}</div>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
   });
   html += `</div>`;
-  if (record.actions && record.actions.filter(a=>a.text).length) {
-    html += `<div class="summary-card"><h3>Action items</h3>`;
-    record.actions.filter(a=>a.text).forEach(a => {
-      html += `<div class="action-item-summary">
-        <div class="action-dot"></div>
-        <div class="action-text">${a.text}</div>
-        <div class="action-owner">${a.owner||'—'}</div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
   document.getElementById('summary-content').innerHTML = html;
 }
 
-function exportSummary() {
-  const topic = TOPICS.find(t=>t.id===retroData.topic);
-  let txt = `RETROSPECTIVA — ${retroData.sprint}\nTema: ${topic?topic.name:'—'}\nFecha: ${retroData.date}\n\n`;
-  STEPS.slice(0,4).forEach(s => {
-    if (retroData.notes[s.id]) txt += `## ${s.name}\n${retroData.notes[s.id]}\n\n`;
+function exportTxt() {
+  const topic = TOPICS.find(t => t.id === retroData.topic);
+  let txt = `RETROSPECTIVA — ${retroData.sprint}\nTema: ${topic ? topic.name : '—'}\nFecha: ${retroData.date}\n\n`;
+  STEPS.forEach(s => {
+    const ideas = retroData.steps && retroData.steps[s.id];
+    if (ideas && ideas.length) {
+      txt += `## ${s.name}\n`;
+      ideas.forEach(i => txt += `- [${i.votes||0}👍] ${i.text}${i.owner?' ['+i.owner+']':''}\n`);
+      txt += '\n';
+    }
   });
-  if (retroData.actions.filter(a=>a.text).length) {
-    txt += `## Action Items\n`;
-    retroData.actions.filter(a=>a.text).forEach(a => txt += `- ${a.text} [${a.owner||'—'}]\n`);
-  }
-  const blob = new Blob([txt], {type:'text/plain'});
+  const blob = new Blob([txt], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `retro-${retroData.sprint.replace(/\s/g,'-')}.txt`;
+  a.download = `retro-${(retroData.sprint||'retro').replace(/\s/g,'-')}.txt`;
   a.click();
 }
 
 function newRetro() {
   showPhase('voting');
-  retroData = { notes:{}, actions:[] };
+  retroData = {};
   currentStep = 0;
   renderTopicGrid();
   listenVotes();
 }
 
-/* HISTORY */
+// ─────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSecs--;
+    updateTimerDisplay();
+    if (timerSecs <= 0) { stopTimer(); const el = document.getElementById('timer'); if (el) el.classList.add('expired'); }
+  }, 1000);
+  const el = document.getElementById('timer');
+  if (el) el.classList.add('running');
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function toggleTimer() {
+  if (timerInterval) { stopTimer(); const el = document.getElementById('timer'); if (el) el.classList.remove('running'); }
+  else startTimer();
+}
+function updateTimerDisplay() {
+  const el = document.getElementById('timer');
+  if (el) el.textContent = formatTime(timerSecs);
+}
+function formatTime(s) {
+  const m = Math.floor(Math.abs(s)/60), sec = Math.abs(s)%60;
+  return (s<0?'-':'') + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+// ─────────────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────────────
 function showHistory() {
-  const history = JSON.parse(localStorage.getItem('retro_history')||'[]');
+  const history = JSON.parse(localStorage.getItem('retro_history') || '[]');
   const list = document.getElementById('history-list');
   if (!history.length) {
-    list.innerHTML = '<div class="empty-history">No hay retros guardadas aún.<br>Completá tu primera retrospectiva.</div>';
+    list.innerHTML = '<div class="empty-state">No hay retros guardadas aún.</div>';
   } else {
     list.innerHTML = '';
-    history.forEach((r,i) => {
-      const topic = TOPICS.find(t=>t.id===r.topic);
+    history.forEach(r => {
+      const topic = TOPICS.find(t => t.id === r.topic);
+      const actions = Object.values(r.steps || {}).flat().length;
       const item = document.createElement('div');
       item.className = 'history-item';
-      item.innerHTML = `<div class="hi-left">
-        <div class="topic-chip">${topic?topic.icon+' '+topic.name:'—'}</div>
-        <h4>${r.sprint||'Sprint'}</h4>
-        <span>${r.date||'—'} · ${(r.actions||[]).filter(a=>a.text).length} acciones</span>
-      </div>
-      <div class="hi-right">Ver →</div>`;
+      item.innerHTML = `<div>
+        <div class="hi-badge">${topic ? topic.icon+' '+topic.name : '—'}</div>
+        <div style="font-size:14px;font-weight:600;margin-top:4px">${r.sprint||'Sprint'}</div>
+        <div style="font-size:12px;color:var(--muted)">${r.date||'—'} · ${actions} ideas</div>
+      </div><div style="font-size:12px;color:var(--muted)">Ver →</div>`;
       item.onclick = () => showHistoryDetail(r);
       list.appendChild(item);
     });
@@ -920,123 +753,252 @@ function showHistory() {
 }
 
 function showHistoryDetail(r) {
-  const topic = TOPICS.find(t=>t.id===r.topic);
-  document.getElementById('modal-title').textContent = (topic?topic.icon+' '+topic.name:'Retro');
-  document.getElementById('modal-meta').textContent = r.sprint + ' · ' + r.date;
+  const topic = TOPICS.find(t => t.id === r.topic);
+  document.getElementById('modal-title').textContent = topic ? topic.icon+' '+topic.name : 'Retro';
+  document.getElementById('modal-meta').textContent = (r.sprint||'') + ' · ' + (r.date||'');
   let html = '';
-  STEPS.slice(0,4).forEach(s => {
-    if (r.notes && r.notes[s.id]) html += `<div class="summary-section" style="margin-bottom:12px">
-      <div class="section-label" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${s.name}</div>
-      <p style="font-size:13px;white-space:pre-wrap">${r.notes[s.id]}</p>
-    </div>`;
+  STEPS.forEach(s => {
+    const ideas = r.steps && r.steps[s.id];
+    if (ideas && ideas.length) {
+      html += `<div style="margin-bottom:1rem"><div class="slabel" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${s.name}</div>`;
+      ideas.slice(0,5).forEach(i => {
+        html += `<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--accent);font-size:12px">${i.votes||0}👍</span>
+          <span style="margin-left:8px">${escapeHtml(i.text)}</span>
+          ${i.owner?`<span style="color:var(--muted);margin-left:6px">[${escapeHtml(i.owner)}]</span>`:''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
   });
-  if (r.actions && r.actions.filter(a=>a.text).length) {
-    html += `<div class="section-label" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:12px">Acciones</div>`;
-    r.actions.filter(a=>a.text).forEach(a => {
-      html += `<div class="action-item-summary" style="margin-bottom:6px">
-        <div class="action-dot"></div>
-        <div class="action-text" style="font-size:13px">${a.text}</div>
-        <div class="action-owner" style="font-size:12px;color:var(--muted)">${a.owner||'—'}</div>
-      </div>`;
-    });
-  }
   document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('modal-history').classList.add('open');
+  document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() { document.getElementById('modal-history').classList.remove('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function backToFacilitator() { switchScreen('facilitator'); }
-function navTo(section) {
-  if (section==='history') showHistory();
-  else backToFacilitator();
-}
 
-/* VOTER MODE */
-function setupVoterMode(sessionKey, apiKeyStr, dbUrlStr) {
-  switchScreen('voter');
-  document.getElementById('voter-screen').style.display = 'flex';
+// ─────────────────────────────────────────────
+// PARTICIPANT SETUP
+// ─────────────────────────────────────────────
+function setupParticipant(sk, apiKey, dbUrl) {
+  participantId = 'p_' + Math.random().toString(36).substr(2, 9);
   try {
-    if (!firebase.apps.length) {
-      firebase.initializeApp({ apiKey: apiKeyStr, databaseURL: dbUrlStr });
-    }
+    if (!firebase.apps.length) firebase.initializeApp({ apiKey, databaseURL: dbUrl });
     db = firebase.database();
+    sessionKey = sk;
+    db.ref(sessionKey + '/participants/' + participantId).set({ joined: Date.now() });
+    db.ref(sessionKey + '/participants/' + participantId).onDisconnect().remove();
+    switchScreen('participant');
+    listenPhaseForParticipant();
   } catch(e) {
-    document.getElementById('voter-content').innerHTML = '<p style="color:var(--danger)">Error al conectar.</p>';
-    return;
+    document.getElementById('p-content').innerHTML = '<p style="color:var(--danger)">Error al conectar.</p>';
   }
-  renderVoterUI(sessionKey);
 }
 
-function renderVoterUI(sessionKey) {
-  const voterId = 'voter_' + Math.random().toString(36).substr(2,8);
-  let selected = [];
-  const content = document.getElementById('voter-content');
-
-  db.ref(sessionKey + '/status').on('value', snap => {
-    if (snap.val() === 'started') {
-      content.innerHTML = `<div class="voted-msg"><div class="check-big">🚀</div><h3>¡La retro comenzó!</h3><p>El facilitador ya inició la sesión. Prestá atención a la pantalla.</p></div>`;
-    }
+function listenPhaseForParticipant() {
+  db.ref(sessionKey + '/phase').on('value', snap => {
+    const phase = snap.val();
+    if (!phase) { renderParticipantVoting(); return; }
+    if (phase.name === 'retro') renderParticipantStep(phase.step, phase.topic);
+    else if (phase.name === 'finished') renderParticipantFinished();
+    else renderParticipantVoting();
   });
+}
 
-  content.innerHTML = `
-    <h2>Votá el tema</h2>
-    <p>Elegí hasta 2 temas para esta retrospectiva</p>
-    <div class="voter-topic-list" id="voter-topics"></div>
-    <button class="btn-vote" id="btn-vote" disabled onclick="submitVote('${sessionKey}', '${voterId}')">Votar →</button>`;
+// ── PARTICIPANT: VOTING ──
+let pSelectedTopics = [];
+let pVoted = false;
 
-  const list = document.getElementById('voter-topics');
+function renderParticipantVoting() {
+  if (pVoted) { renderParticipantWaiting('¡Voto registrado!', 'Esperá a que el facilitador inicie la retro.'); return; }
+  pSelectedTopics = [];
+  const content = document.getElementById('p-content');
+  content.innerHTML = `<h2 style="font-size:20px;font-weight:700;margin-bottom:.25rem">Votá el tema</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">Elegí hasta 2 temas para esta retro</p>
+    <div class="p-topic-list" id="p-topic-list"></div>
+    <button class="btn-vote" id="p-btn-vote" disabled onclick="submitTopicVote()">Votar →</button>`;
+  const list = document.getElementById('p-topic-list');
   TOPICS.forEach(t => {
     const div = document.createElement('div');
-    div.className = 'voter-topic';
-    div.id = 'vt-' + t.id;
-    div.innerHTML = `<div class="check" id="chk-${t.id}"></div>
+    div.className = 'p-topic'; div.id = 'pt-' + t.id;
+    div.innerHTML = `<div class="p-check" id="pchk-${t.id}"></div>
       <div><div class="t-name">${t.icon} ${t.name}</div><div class="t-desc">${t.desc}</div></div>`;
     div.onclick = () => {
-      if (selected.includes(t.id)) {
-        selected = selected.filter(x=>x!==t.id);
+      if (pSelectedTopics.includes(t.id)) {
+        pSelectedTopics = pSelectedTopics.filter(x => x !== t.id);
         div.classList.remove('selected');
-      } else if (selected.length < 2) {
-        selected.push(t.id);
+      } else if (pSelectedTopics.length < 2) {
+        pSelectedTopics.push(t.id);
         div.classList.add('selected');
       }
-      document.getElementById('btn-vote').disabled = selected.length === 0;
+      document.getElementById('p-btn-vote').disabled = pSelectedTopics.length === 0;
     };
     list.appendChild(div);
   });
 }
 
-function submitVote(sessionKey, voterId) {
-  const selected = [...document.querySelectorAll('.voter-topic.selected')].map(el=>el.id.replace('vt-',''));
-  db.ref(sessionKey + '/votes/' + voterId).set(selected).then(() => {
-    document.getElementById('voter-content').innerHTML = `
-      <div class="voted-msg">
-        <div class="check-big">✅</div>
-        <h3>¡Voto registrado!</h3>
-        <p>Esperá a que el facilitador inicie la retro.</p>
-      </div>`;
+function submitTopicVote() {
+  db.ref(sessionKey + '/votes/' + participantId).set(pSelectedTopics).then(() => {
+    pVoted = true;
+    renderParticipantWaiting('¡Voto registrado!', 'Esperá a que el facilitador inicie la retro.');
   });
 }
 
-/* INIT */
+// ── PARTICIPANT: RETRO STEP ──
+let pIdeasSubmitted = {};  // stepId -> [ideas]
+let pVotedIdeas = {};      // stepId -> {ideaId: true}
+let pCurrentStep = -1;
+let pCurrentTopic = null;
+
+function renderParticipantStep(stepIdx, topicId) {
+  pCurrentStep = stepIdx;
+  pCurrentTopic = topicId;
+  const step = STEPS[stepIdx];
+  const prompt = STEP_PROMPTS[step.id];
+  const topic = TOPICS.find(t => t.id === topicId);
+
+  // Questions for exploration
+  let questions = [];
+  if (stepIdx === 2 && topicId) questions = TOPIC_QUESTIONS[topicId] || [];
+  else if (prompt && prompt.questions) questions = prompt.questions;
+
+  const content = document.getElementById('p-content');
+  const alreadySent = pIdeasSubmitted[step.id] || [];
+
+  // Show two sections: input + vote
+  content.innerHTML = `
+    <div style="margin-bottom:.75rem">
+      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">${step.name}</div>
+      <div class="p-step-title">${prompt ? prompt.title : step.name}</div>
+      <div class="p-step-sub">${prompt ? prompt.sub : ''}</div>
+    </div>
+    ${questions.length ? `<div class="p-question">${questions[0]}</div>` : ''}
+    ${alreadySent.length ? `<div class="ideas-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>` : ''}
+    <textarea class="p-textarea" id="p-idea-input" placeholder="Escribí tu idea..."></textarea>
+    <button class="btn-vote" onclick="submitIdea('${step.id}')">Enviar idea</button>
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.5rem">Votá las ideas del equipo</div>
+      <div class="votes-left" id="p-votes-left"></div>
+      <div id="p-ideas-vote-list"></div>
+    </div>`;
+
+  listenIdeasForVoting(step.id, step.maxVotes);
+}
+
+function submitIdea(stepId) {
+  const input = document.getElementById('p-idea-input');
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  const ideaRef = db.ref(sessionKey + '/ideas/' + stepId).push();
+  ideaRef.set({ text, votes: 0, submittedBy: participantId, ts: Date.now() }).then(() => {
+    if (!pIdeasSubmitted[stepId]) pIdeasSubmitted[stepId] = [];
+    pIdeasSubmitted[stepId].push(text);
+    input.value = '';
+    // refresh sent list
+    const sentDiv = document.querySelector('.ideas-sent');
+    if (sentDiv) sentDiv.innerHTML = pIdeasSubmitted[stepId].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
+    else {
+      const newSent = document.createElement('div');
+      newSent.className = 'ideas-sent';
+      newSent.innerHTML = pIdeasSubmitted[stepId].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
+      input.parentNode.insertBefore(newSent, input);
+    }
+  });
+}
+
+function listenIdeasForVoting(stepId, maxVotes) {
+  db.ref(sessionKey + '/ideas/' + stepId).on('value', snap => {
+    const ideas = snap.val() || {};
+    const list = Object.entries(ideas)
+      .map(([k, v]) => ({ id: k, ...v }))
+      .filter(i => i.submittedBy !== participantId) // no votar las propias
+      .sort((a, b) => (b.votes||0) - (a.votes||0));
+
+    const myVotes = pVotedIdeas[stepId] || {};
+    const usedVotes = Object.keys(myVotes).length;
+    const remaining = maxVotes - usedVotes;
+
+    const votesLeftEl = document.getElementById('p-votes-left');
+    if (votesLeftEl) votesLeftEl.innerHTML = `Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx. ${maxVotes})`;
+
+    const voteList = document.getElementById('p-ideas-vote-list');
+    if (!voteList) return;
+    if (!list.length) { voteList.innerHTML = '<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas de otros participantes.</div>'; return; }
+    voteList.innerHTML = list.map(idea => {
+      const isVoted = !!myVotes[idea.id];
+      const canVote = remaining > 0 || isVoted;
+      return `<div class="vote-idea-card ${isVoted?'voted':''}" onclick="toggleIdeaVote('${stepId}','${idea.id}',${maxVotes},${isVoted})">
+        <div class="vi-text">${escapeHtml(idea.text)}</div>
+        <div class="vi-foot">
+          <span class="vi-check"></span>
+          <span>${isVoted ? 'Votado · ' : ''}${idea.votes||0} voto${(idea.votes||0)!==1?'s':''}</span>
+          ${!canVote && !isVoted ? '<span style="color:var(--muted)">— Sin votos disponibles</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function toggleIdeaVote(stepId, ideaId, maxVotes, isVoted) {
+  const myVotes = pVotedIdeas[stepId] || {};
+  const usedVotes = Object.keys(myVotes).length;
+  if (isVoted) {
+    // quitar voto
+    delete myVotes[ideaId];
+    pVotedIdeas[stepId] = myVotes;
+    db.ref(sessionKey + '/ideas/' + stepId + '/' + ideaId + '/votes').transaction(v => Math.max(0, (v||0) - 1));
+  } else {
+    if (usedVotes >= maxVotes) return;
+    myVotes[ideaId] = true;
+    pVotedIdeas[stepId] = myVotes;
+    db.ref(sessionKey + '/ideas/' + stepId + '/' + ideaId + '/votes').transaction(v => (v||0) + 1);
+  }
+}
+
+function renderParticipantWaiting(title, msg) {
+  document.getElementById('p-content').innerHTML = `
+    <div class="waiting-msg">
+      <div class="waiting-icon">⏳</div>
+      <h3>${title}</h3>
+      <p><span class="pulse-dot"></span>${msg}</p>
+    </div>`;
+}
+
+function renderParticipantFinished() {
+  document.getElementById('p-content').innerHTML = `
+    <div class="waiting-msg">
+      <div class="waiting-icon">🎉</div>
+      <h3>¡Retro completada!</h3>
+      <p>Gracias por participar. El facilitador tiene el resumen.</p>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
-  isVoterMode = params.get('mode') === 'voter';
-  if (isVoterMode) {
-    document.getElementById('config-screen').style.display = 'none';
-    const sk = params.get('session');
-    const ak = decodeURIComponent(params.get('apikey')||'');
-    const du = decodeURIComponent(params.get('dburl')||'');
+  const mode = params.get('mode');
+  if (mode === 'participant') {
+    const sk  = params.get('session');
+    const ak  = decodeURIComponent(params.get('apikey') || '');
+    const du  = decodeURIComponent(params.get('dburl')  || '');
     if (sk && ak && du) {
-      setupVoterMode(sk, ak, du);
+      setupParticipant(sk, ak, du);
     } else {
-      document.getElementById('voter-screen').style.display = 'flex';
-      document.getElementById('voter-screen').classList.add('active');
-      document.getElementById('voter-content').innerHTML = '<p style="color:var(--danger)">URL de votación inválida.</p>';
+      switchScreen('participant');
+      document.getElementById('p-content').innerHTML = '<p style="color:var(--danger)">Link de acceso inválido.</p>';
     }
   } else {
-    document.getElementById('config-screen').style.display = 'flex';
-    document.getElementById('config-screen').classList.add('active');
-    // Pre-cargar credenciales guardadas de una sesión anterior
+    switchScreen('config');
     const saved = localStorage.getItem('retro_fb_config');
     if (saved) {
       try {
