@@ -350,7 +350,13 @@ input:focus{border-color:var(--accent);}
             <div class="status-dot"></div>
             <span><strong id="live-count">0</strong> participantes activos</span>
           </div>
-          <div id="panel-instructions" style="font-size:12px;color:var(--muted);line-height:1.6"></div>
+          <div id="panel-instructions" style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem"></div>
+          <!-- QR siempre visible -->
+          <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+            <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem">Acceso del equipo</div>
+            <div id="retro-qr" style="display:flex;justify-content:center;margin-bottom:.75rem"></div>
+            <button class="btn-copy" onclick="copyLink()" id="btn-copy-retro">📋 Copiar link</button>
+          </div>
         </div>
       </div>
     </div>
@@ -600,9 +606,10 @@ function generateQR(){
 function copyLink(){
   if(!window._participantUrl) return;
   navigator.clipboard.writeText(window._participantUrl).then(()=>{
-    const btn=document.getElementById('btn-copy');
-    btn.textContent='✓ Copiado';
-    setTimeout(()=>btn.textContent='📋 Copiar link',1800);
+    ['btn-copy','btn-copy-retro'].forEach(id=>{
+      const btn=document.getElementById(id);
+      if(btn){btn.textContent='✓ Copiado';setTimeout(()=>btn.textContent='📋 Copiar link',1800);}
+    });
   });
 }
 
@@ -682,6 +689,14 @@ function startRetro(){
   showPhase('retro');
   renderStepNav();
   renderFacilitatorStep(0);
+  // Render persistent QR in the retro side panel
+  setTimeout(()=>{
+    const qrDiv=document.getElementById('retro-qr');
+    if(qrDiv&&window._participantUrl){
+      qrDiv.innerHTML='';
+      new QRCode(qrDiv,{text:window._participantUrl,width:120,height:120,colorDark:'#f0f0ee',colorLight:'#1e2127',correctLevel:QRCode.CorrectLevel.M});
+    }
+  },100);
 }
 
 function renderStepNav(){
@@ -1450,24 +1465,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     else{switchScreen('participant');document.getElementById('p-content').innerHTML='<p style="color:var(--danger)">Link de acceso inválido.</p>';}
   }else{
     switchScreen('config');
-    // Pre-fill saved config
+    // Only restore Firebase credentials — sprint data always starts fresh
     const saved=localStorage.getItem('retro_fb_config');
     if(saved){try{const cfg=JSON.parse(saved);document.getElementById('fb-apikey').value=cfg.apiKey||'';document.getElementById('fb-dburl').value=cfg.dbUrl||'';}catch(e){}}
-    // Pre-fill saved sprint data
-    const savedSd=localStorage.getItem('retro_sprint_data');
-    if(savedSd){
-      try{
-        const sd=JSON.parse(savedSd);
-        const cur=sd.current||{};
-        document.getElementById('sprint-name').value=cur.name||'';
-        const map={velEst:'s0-vel-est',vel:'s0-vel',carry:'s0-carry',leadtime:'s0-leadtime',bugs:'s0-bugs',incidents:'s0-incidents',qa:'s0-qa',efectividad:'s0-efectividad'};
-        Object.entries(map).forEach(([k,id])=>{if(document.getElementById(id)&&cur[k]&&cur[k]!=='—') document.getElementById(id).value=cur[k];});
-        if(sd.prev1){document.getElementById('s1-name').value=sd.prev1.name||'';const m1={velEst:'s1-vel-est',vel:'s1-vel',carry:'s1-carry',leadtime:'s1-leadtime',bugs:'s1-bugs',incidents:'s1-incidents',qa:'s1-qa',efectividad:'s1-efectividad'};Object.entries(m1).forEach(([k,id])=>{if(document.getElementById(id)&&sd.prev1[k]&&sd.prev1[k]!=='—') document.getElementById(id).value=sd.prev1[k];});}
-        if(sd.prev2){document.getElementById('s2-name').value=sd.prev2.name||'';const m2={velEst:'s2-vel-est',vel:'s2-vel',carry:'s2-carry',leadtime:'s2-leadtime',bugs:'s2-bugs',incidents:'s2-incidents',qa:'s2-qa',efectividad:'s2-efectividad'};Object.entries(m2).forEach(([k,id])=>{if(document.getElementById(id)&&sd.prev2[k]&&sd.prev2[k]!=='—') document.getElementById(id).value=sd.prev2[k];});}
-        // Update sprint label
-        document.getElementById('current-sprint-label').textContent=cur.name||'Sprint actual';
-      }catch(e){}
-    }
   }
 });
 </script>
