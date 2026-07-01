@@ -234,12 +234,6 @@ input:focus{border-color:var(--accent);}
     <p>Completá los datos del sprint y la conexión a Firebase antes de empezar.</p>
     <div id="config-error" class="error-msg"></div>
 
-    <div class="section-divider">Conexión Firebase</div>
-    <label>Firebase API Key</label>
-    <input type="password" id="fb-apikey" placeholder="AIzaSy..." />
-    <label>Firebase Database URL</label>
-    <input type="text" id="fb-dburl" placeholder="https://tu-proyecto.firebaseio.com" />
-
     <div class="section-divider">Sprint actual</div>
     <label>Nombre del sprint</label>
     <input type="text" id="sprint-name" placeholder="Sprint 42 — Q2 2026" />
@@ -289,8 +283,24 @@ input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Firebase — collapsed by default, subtle -->
+    <details id="firebase-details" style="margin-bottom:1rem">
+      <summary style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
+        <span id="fb-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block;flex-shrink:0"></span>
+        <span id="fb-status-label">Conexión Firebase</span>
+        <span style="margin-left:auto;font-size:10px;opacity:.5">▼</span>
+      </summary>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-top:.5rem">
+        <label style="margin-bottom:4px">Firebase API Key</label>
+        <input type="password" id="fb-apikey" placeholder="AIzaSy..." style="margin-bottom:.75rem" />
+        <label style="margin-bottom:4px">Firebase Database URL</label>
+        <input type="text" id="fb-dburl" placeholder="https://tu-proyecto.firebaseio.com" style="margin-bottom:0" />
+        <div style="font-size:11px;color:var(--muted);margin-top:.75rem;line-height:1.5">
+          ¿Primera vez? Gratis en <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent);text-decoration:none">console.firebase.google.com</a> → Realtime Database → Modo test.
+        </div>
+      </div>
+    </details>
     <button class="btn-primary" onclick="initApp()">Conectar y empezar →</button>
-    <div class="config-hint">¿Primera vez? Gratis en <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Realtime Database → Modo test.</div>
   </div>
 </div>
 
@@ -1467,7 +1477,22 @@ window.addEventListener('DOMContentLoaded',()=>{
     switchScreen('config');
     // Only restore Firebase credentials — sprint data always starts fresh
     const saved=localStorage.getItem('retro_fb_config');
-    if(saved){try{const cfg=JSON.parse(saved);document.getElementById('fb-apikey').value=cfg.apiKey||'';document.getElementById('fb-dburl').value=cfg.dbUrl||'';}catch(e){}}
+    if(saved){
+      try{
+        const cfg=JSON.parse(saved);
+        document.getElementById('fb-apikey').value=cfg.apiKey||'';
+        document.getElementById('fb-dburl').value=cfg.dbUrl||'';
+        // Show configured state — green dot, keep collapsed
+        const dot=document.getElementById('fb-status-dot');
+        const lbl=document.getElementById('fb-status-label');
+        if(dot) dot.style.background='var(--accent)';
+        if(lbl) lbl.textContent='Firebase configurado';
+      }catch(e){}
+    } else {
+      // No credentials yet — open the panel so user knows to fill it
+      const details=document.getElementById('firebase-details');
+      if(details) details.open=true;
+    }
   }
 });
 </script>
