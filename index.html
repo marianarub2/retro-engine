@@ -819,14 +819,14 @@ function renderFacilitatorStep(idx){
     <div class="ideas-board" id="vote-results-board"><div class="empty-board">Esperando votos...</div></div>`;
 
   } else if(step.id==='acciones'){
-    // ACCIONES — facilitator sees proposals
+    // ACCIONES — facilitator sees proposals with editable owner
     html+=`<p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5">
-      El equipo propone acciones basadas en los insights más votados.
+      El equipo propone acciones. Podés asignar o editar el responsable de cada una.
     </p>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <p class="section-title" style="margin-bottom:0">Acciones propuestas <span style="color:var(--accent)" id="idea-count"></span></p>
     </div>
-    <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando propuestas...</div></div>`;
+    <div class="ideas-board" id="acciones-board"><div class="empty-board">Esperando propuestas...</div></div>`;
 
   } else if(step.id==='voto-acciones'){
     // VOTING ACCIONES — facilitator sees live results
@@ -875,6 +875,8 @@ function renderFacilitatorStep(idx){
     listenVoteResults('acciones','vote-results-board');
   } else if(step.id==='explora'){
     listenIdeas(step.id, true);  // selectable
+  } else if(step.id==='acciones'){
+    listenAcciones();
   } else {
     listenIdeas(step.id, false);
   }
@@ -906,6 +908,52 @@ function listenVoteResults(stepId, boardId){
   });
 }
 
+function listenAcciones(){
+  db.ref(sessionKey+'/ideas/acciones').on('value', snap=>{
+    const ideas=snap.val()||{};
+    const board=document.getElementById('acciones-board');
+    if(!board) return;
+    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>(a.ts||0)-(b.ts||0));
+    const count=document.getElementById('idea-count');
+    if(count) count.textContent=list.length?`(${list.length})`:'';
+    if(!list.length){
+      board.innerHTML='<div class="empty-board">Esperando propuestas del equipo...</div>';
+      return;
+    }
+    board.innerHTML=list.map(idea=>`
+      <div class="idea-card" style="flex-direction:column;align-items:stretch;gap:8px">
+        <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);white-space:nowrap">👤 Responsable</div>
+          <input
+            type="text"
+            value="${escapeHtml(idea.owner||'')}"
+            placeholder="Sin asignar — escribí un nombre"
+            data-idea-id="${idea.id}"
+            onblur="saveOwner('${idea.id}',this.value)"
+            onkeydown="if(event.key==='Enter'){this.blur();}"
+            style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;
+                   color:var(--text);font-size:12px;padding:5px 8px;outline:none;
+                   transition:border-color .15s;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur2="this.style.borderColor='var(--border)'"
+          />
+        </div>
+      </div>`).join('');
+    if(!retroData.steps) retroData.steps={};
+    retroData.steps['acciones']=list;
+  });
+}
+
+function saveOwner(ideaId, ownerValue){
+  const trimmed=ownerValue.trim();
+  db.ref(sessionKey+'/ideas/acciones/'+ideaId+'/owner').set(trimmed);
+  // Also update the input border back to normal
+  const input=document.querySelector(`input[data-idea-id="${ideaId}"]`);
+  if(input) input.style.borderColor='var(--border)';
+}
+
 function updateSprintField(field,value){
   if(sprintData.current) sprintData.current[field]=value;
   retroData.sprintData=sprintData;
@@ -918,35 +966,83 @@ function listenIdeas(stepId, selectable){
     const ideas=snap.val()||{};
     const board=document.getElementById('ideas-board');
     if(!board) return;
-    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v})).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>{
+        const qDiff=(a.questionIdx!=null?a.questionIdx:99)-(b.questionIdx!=null?b.questionIdx:99);
+        return qDiff!==0 ? qDiff : (a.ts||0)-(b.ts||0);
+      });
     const count=document.getElementById('idea-count');
     if(count) count.textContent=list.length?`(${list.length})`:'';
     if(!list.length){board.innerHTML='<div class="empty-board">Esperando aportes del equipo...</div>';return;}
     if(!retroData.steps) retroData.steps={};
     retroData.steps[stepId]=list;
+    // Group ideas by question
+    const grouped={};
+    list.forEach(idea=>{
+      const key=idea.questionIdx!=null?idea.questionIdx:99;
+      if(!grouped[key]) grouped[key]=[];
+      grouped[key].push(idea);
+    });
+
     if(selectable){
-      // Facilitator selects which insights go to vote
-      board.innerHTML=list.map(idea=>`
-        <div class="idea-card selectable ${(window._selectedInsights||{})[idea.id]?'selected-insight':''}"
-             id="icard-${idea.id}"
-             onclick="toggleSelectInsight('${stepId}','${idea.id}')">
-          <div style="flex:1">
-            ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
-            <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+      // Facilitator selects which insights go to vote — grouped by question
+      let html='';
+      Object.keys(grouped).sort((a,b)=>Number(a)-Number(b)).forEach(qIdx=>{
+        const group=grouped[qIdx];
+        const qLabel=group[0].question||'Observaciones libres';
+        html+=`<div style="margin-bottom:1.25rem">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.04em;
+                      padding:6px 10px;background:var(--surface2);border-radius:var(--radius);
+                      margin-bottom:6px;border-left:3px solid var(--accent)">
+            ${escapeHtml(qLabel)}
           </div>
-          <div style="font-size:18px;line-height:1;flex-shrink:0">${(window._selectedInsights||{})[idea.id]?'✅':'○'}</div>
-        </div>`).join('');
+          <div style="display:flex;flex-direction:column;gap:6px">
+            ${group.map(idea=>`
+              <div class="idea-card selectable ${(window._selectedInsights||{})[idea.id]?'selected-insight':''}"
+                   id="icard-${idea.id}"
+                   onclick="toggleSelectInsight('${stepId}','${idea.id}')">
+                <div class="idea-text" style="flex:1">${escapeHtml(idea.shortText||idea.text)}</div>
+                <div style="font-size:18px;line-height:1;flex-shrink:0">${(window._selectedInsights||{})[idea.id]?'✅':'○'}</div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      });
+      board.innerHTML=html;
       updateSelectionCount();
     } else {
-      board.innerHTML=list.map(idea=>`
-        <div class="idea-card">
-          <div style="flex:1">
-            ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
-            <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
-            ${idea.owner?`<div style="font-size:11px;color:var(--accent);margin-top:3px">👤 ${escapeHtml(idea.owner)}</div>`:''}
-          </div>
-          ${idea.votes>0?`<div class="vote-btn">👍 ${idea.votes}</div>`:''}
-        </div>`).join('');
+      // Read-only grouped view (checkin, datos, etc.)
+      let html='';
+      Object.keys(grouped).sort((a,b)=>Number(a)-Number(b)).forEach(qIdx=>{
+        const group=grouped[qIdx];
+        const qLabel=group[0].question||'';
+        if(qLabel){
+          html+=`<div style="margin-bottom:1.25rem">
+            <div style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.04em;
+                        padding:6px 10px;background:var(--surface2);border-radius:var(--radius);
+                        margin-bottom:6px;border-left:3px solid var(--accent)">
+              ${escapeHtml(qLabel)}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              ${group.map(idea=>`
+                <div class="idea-card">
+                  <div class="idea-text" style="flex:1">${escapeHtml(idea.shortText||idea.text)}</div>
+                  ${idea.votes>0?`<div class="vote-btn">👍 ${idea.votes}</div>`:''}
+                </div>`).join('')}
+            </div>
+          </div>`;
+        } else {
+          // No question label (check-in, datos)
+          html+=group.map(idea=>`
+            <div class="idea-card">
+              <div style="flex:1">
+                <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+                ${idea.owner?`<div style="font-size:11px;color:var(--accent);margin-top:3px">👤 ${escapeHtml(idea.owner)}</div>`:''}
+              </div>
+              ${idea.votes>0?`<div class="vote-btn">👍 ${idea.votes}</div>`:''}
+            </div>`).join('');
+        }
+      });
+      board.innerHTML=html;
     }
   });
 }
