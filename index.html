@@ -217,6 +217,19 @@ input:focus{border-color:var(--accent);}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;}
 .modal h3{font-size:18px;font-weight:700;margin-bottom:.5rem;}
+.idea-card.selectable{cursor:pointer;transition:border-color .15s,background .15s;}
+.idea-card.selectable:hover{border-color:var(--muted);}
+.idea-card.selected-insight{border-color:var(--accent)!important;background:var(--accent-bg)!important;}
+.vote-insight-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;}
+.vote-insight-card:hover{border-color:var(--muted);}
+.vote-insight-card.voted{border-color:var(--accent);background:var(--accent-bg);}
+.vote-insight-card .vic-question{font-size:10px;color:var(--accent);margin-bottom:4px;line-height:1.3;}
+.vote-insight-card .vic-text{font-size:14px;line-height:1.5;margin-bottom:6px;}
+.vote-insight-card .vic-foot{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.vote-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.vote-insight-card.voted .vote-check{background:var(--accent);border-color:var(--accent);}
+.votes-remaining{font-size:12px;color:var(--muted);margin-bottom:1rem;padding:8px 12px;background:var(--surface2);border-radius:var(--radius);}
+.votes-remaining strong{color:var(--accent);}
 @media(max-width:700px){
   .voting-layout,.retro-layout{grid-template-columns:1fr;}
   .step-pill{font-size:10px;padding:5px 4px;}
@@ -432,64 +445,67 @@ const TOPICS=[
   {id:'discovery',name:'Discovery',          desc:'Ideas, experimentos, backlog',        icon:'💡'},
 ];
 const STEPS=[
-  {id:'checkin', name:'Check-in',   mins:3, maxVotes:0},
-  {id:'datos',   name:'Datos',      mins:5, maxVotes:0},
-  {id:'explora', name:'Exploración',mins:15,maxVotes:3},
-  {id:'insights',name:'Insights',   mins:5, maxVotes:2},
-  {id:'acciones',name:'Acciones',   mins:10,maxVotes:2},
+  {id:'checkin',      name:'Check-in',       mins:3 },
+  {id:'datos',        name:'Datos',          mins:5 },
+  {id:'explora',      name:'Exploración',    mins:20},
+  {id:'voto-insights',name:'Votar insights', mins:5 },
+  {id:'acciones',     name:'Acciones',       mins:10},
+  {id:'voto-acciones',name:'Votar acciones', mins:5 },
 ];
 const TOPIC_QUESTIONS={
   delays:   [
-    '¿Qué fue lo que más te frenó a vos o al equipo este sprint?',
-    '¿Cuándo apareció ese bloqueo — al inicio, en el medio, al cierre? ¿Pudimos haberlo anticipado?',
-    '¿Qué cambiaría vos específicamente para que no se repita?',
+    '¿Qué aprendiste sobre cómo el equipo maneja (o no maneja) los bloqueos? ¿Hay un patrón que se repite?',
+    '¿Qué señal ignoramos o vimos tarde que, si la hubiéramos atendido antes, hubiera cambiado el resultado?',
+    '¿Qué cambio estructural — no parche — evitaría que este bloqueo vuelva a frenar al equipo?',
   ],
   metricas: [
-    '¿Qué número del sprint te llamó más la atención — para bien o para mal?',
-    '¿Creés que ese número refleja la realidad de cómo trabajamos, o hay algo que no estamos midiendo?',
-    '¿Qué acción concreta cambiaría esa métrica en el próximo sprint?',
+    '¿Qué te dice el número más llamativo del sprint sobre cómo realmente trabaja el equipo?',
+    '¿Dónde hay una brecha entre lo que medimos y lo que importa? ¿Qué estamos dejando invisible?',
+    '¿Qué comportamiento o práctica del equipo explica el resultado de esta métrica — para bien o para mal?',
   ],
   cliente:  [
-    '¿Qué pedido o feedback del cliente te generó más fricción o sorpresa este sprint?',
-    '¿Sentís que entendemos bien lo que el cliente realmente necesita, o estamos adivinando?',
-    '¿Qué haríamos diferente para estar más alineados con el cliente desde el inicio?',
+    '¿Qué aprendiste sobre la brecha entre lo que el cliente pide y lo que realmente necesita?',
+    '¿Qué suposición sobre el cliente estuvimos operando que este sprint demostró que era incorrecta o incompleta?',
+    '¿Qué cambiaría en cómo trabajamos si pusiéramos al cliente en el centro desde el día 1 del sprint?',
   ],
   calidad:  [
-    '¿Qué problema de calidad te pesó más este sprint — un bug, un rechazo QA, algo que salió mal?',
-    '¿En qué momento del proceso se podría haber detectado antes?',
-    '¿Qué acuerdo o práctica concreta mejoraría la calidad del próximo sprint?',
+    '¿Qué te dice el problema de calidad de este sprint sobre nuestro proceso — no sobre el error puntual?',
+    '¿En qué punto del flujo la calidad dejó de ser responsabilidad de todos y se convirtió en responsabilidad de uno solo?',
+    '¿Qué práctica concreta, si la incorporáramos como hábito, cambiaría la calidad de lo que entregamos?',
   ],
   ciclos:   [
-    '¿Dónde se atascó el trabajo más tiempo este sprint — en análisis, desarrollo, revisión, deploy?',
-    '¿Tuviste que esperar algo o a alguien para avanzar? ¿Qué impacto tuvo eso?',
-    '¿Qué cambio en el flujo de trabajo reduciría ese tiempo de espera?',
+    '¿Qué aprendiste sobre dónde realmente se pierde el tiempo en el flujo — no dónde creíamos que se perdía?',
+    '¿Qué dependencia o espera se repite sprint a sprint y nunca terminamos de resolver?',
+    '¿Qué límite o acuerdo del equipo cambiaría el ciclo de trabajo de forma estructural?',
   ],
   acuerdos: [
-    '¿Qué acuerdo de equipo se cumplió bien este sprint y cuál no tanto?',
-    '¿Hay algún acuerdo que ya no tiene sentido o que deberíamos actualizar?',
-    '¿Qué acuerdo nuevo propondrías para mejorar cómo trabajamos juntos?',
+    '¿Qué te dice el incumplimiento (o cumplimiento) de los acuerdos sobre la cultura real del equipo?',
+    '¿Hay acuerdos que seguimos por inercia pero que ya no reflejan cómo queremos trabajar?',
+    '¿Qué acuerdo nuevo, si lo cumpliéramos el 100% del tiempo, tendría el mayor impacto positivo?',
   ],
   carryover:[
-    '¿Qué tarea arrastraste o viste arrastrar este sprint? ¿Por qué no cerró?',
-    '¿Fue un problema de estimación, de bloqueo o de foco del equipo?',
-    '¿Qué harías diferente al planificar para evitar ese carry over?',
+    '¿Qué aprendiste sobre cómo el equipo estima y planifica — más allá del item que arrastró?',
+    '¿El carry over fue un síntoma de qué problema más profundo: foco, tamaño, dependencias, contexto?',
+    '¿Qué cambio en el proceso de planning reduciría el carry over de forma sostenida, no puntual?',
   ],
   energia:  [
-    '¿Con qué nivel de energía cerrás este sprint — del 1 al 5? ¿Qué lo explica?',
-    '¿Hubo algo este sprint que te sacó energía o motivación? ¿Y algo que te la sumó?',
-    '¿Qué necesitaría el equipo para estar en su mejor versión el próximo sprint?',
+    '¿Qué aprendiste sobre qué condiciones hacen que el equipo trabaje con más energía y foco?',
+    '¿Qué dinámica del equipo o del entorno está drenando energía sprint a sprint sin que lo nombremos?',
+    '¿Qué cambio concreto — en cómo nos organizamos, comunicamos o reconocemos el trabajo — haría la diferencia?',
   ],
   deuda:    [
-    '¿Qué deuda técnica te generó más fricción o riesgo este sprint?',
-    '¿Tenemos visibilidad real de cuánta deuda acumulamos, o trabajamos "a ciegas"?',
-    '¿Qué refactor o mejora priorizarías primero si tuviéramos tiempo dedicado?',
+    '¿Qué aprendiste sobre el costo real de postergar la deuda técnica — en velocidad, calidad o motivación?',
+    '¿Hay un patrón en cómo acumulamos deuda? ¿Es una decisión consciente o una consecuencia de cómo planificamos?',
+    '¿Qué acuerdo de equipo necesitamos para que la deuda técnica tenga un lugar real en el sprint, no solo en la conversación?',
   ],
   discovery:[
-    '¿Qué idea o aprendizaje del sprint sentís que merece explorarse más?',
-    '¿Hay alguna hipótesis sobre el producto o los usuarios que nunca llegamos a validar?',
-    '¿Qué experimento pequeño propondrías para el próximo sprint?',
+    '¿Qué aprendiste sobre el gap entre lo que construimos y lo que los usuarios realmente valoran?',
+    '¿Qué hipótesis del equipo este sprint resultó ser una suposición sin validar — y qué costo tuvo eso?',
+    '¿Qué cambiaría en cómo priorizamos si tuviéramos más evidencia de usuarios y menos intuición?',
   ],
 };
+// Open-ended question appended to all topics
+const OPEN_QUESTION='¿Hay algo más que querés dejar dicho sobre este sprint — algo que no entraba en las preguntas anteriores?';
 
 // ── STATE ─────────────────────────────────────
 let db,sessionKey,sprintName,selectedTopic;
@@ -736,10 +752,12 @@ function renderFacilitatorStep(idx){
   timerSecs=step.mins*60;
   let html=`<div class="step-header"><h2>${step.name}</h2><div class="timer-badge" id="timer" onclick="toggleTimer()">${formatTime(timerSecs)}</div></div>`;
 
+  window._selectedInsights = window._selectedInsights||{};
+
   if(idx===0){
-    // CHECK-IN: solo lectura de ideas, sin preguntas de votación
+    // CHECK-IN
     html+=`<p style="font-size:14px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6">
-      El equipo comparte cómo llega a la retro. Leé algunas en voz alta para abrir la sesión. No hay votación en este paso.
+      El equipo comparte cómo llega a la retro. Leé algunas en voz alta para abrir la sesión.
     </p>`;
     html+=`<p class="section-title" style="margin-bottom:8px">Respuestas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
       <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando respuestas del equipo...</div></div>`;
@@ -781,23 +799,63 @@ function renderFacilitatorStep(idx){
     html+=`<p class="section-title" style="margin-bottom:8px">Observaciones del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
       <div class="ideas-board" id="ideas-board"><div class="empty-board">El equipo puede agregar observaciones sobre los datos...</div></div>`;
 
-  } else {
-    // EXPLORACIÓN, INSIGHTS, ACCIONES
-    const questions=idx===2&&selectedTopic?TOPIC_QUESTIONS[selectedTopic.id]||[]:[];
-    if(questions.length){
-      html+=`<ul class="questions-list">${questions.map((q,i)=>`<li ${i===0?'class="hl"':''}>${q}</li>`).join('')}</ul>`;
-    }
-    html+=`<p class="section-title" style="margin-bottom:8px">Ideas del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+  } else if(step.id==='explora'){
+    // EXPLORACIÓN — facilitator selects which insights go to vote
+    html+=`
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5">
+        Hacé clic en los insights que querés llevar a votación. Cuando estés listo, abrí la votación para el equipo.
+      </p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <p class="section-title" style="margin-bottom:0">Insights del equipo <span style="color:var(--accent)" id="idea-count"></span></p>
+        <span id="selection-count" style="font-size:12px;color:var(--muted)">Ninguno seleccionado</span>
+      </div>
       <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando aportes del equipo...</div></div>`;
+
+  } else if(step.id==='voto-insights'){
+    // VOTING INSIGHTS — facilitator sees live results
+    html+=`<p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5">
+      El equipo está votando. Los resultados aparecen en tiempo real.
+    </p>
+    <div class="ideas-board" id="vote-results-board"><div class="empty-board">Esperando votos...</div></div>`;
+
+  } else if(step.id==='acciones'){
+    // ACCIONES — facilitator sees proposals
+    html+=`<p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5">
+      El equipo propone acciones basadas en los insights más votados.
+    </p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <p class="section-title" style="margin-bottom:0">Acciones propuestas <span style="color:var(--accent)" id="idea-count"></span></p>
+    </div>
+    <div class="ideas-board" id="ideas-board"><div class="empty-board">Esperando propuestas...</div></div>`;
+
+  } else if(step.id==='voto-acciones'){
+    // VOTING ACCIONES — facilitator sees live results
+    html+=`<p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5">
+      El equipo está votando las acciones. Los compromisos del sprint aparecen ordenados por votos.
+    </p>
+    <div class="ideas-board" id="vote-results-board"><div class="empty-board">Esperando votos...</div></div>`;
   }
 
+  // Navigation buttons with special CTAs for selection steps
   const isLast=idx===STEPS.length-1;
-  html+=`<div class="btn-row" style="margin-top:1.5rem">
-    ${idx>0?`<button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>`:''}
-    ${!isLast
-      ?`<button class="btn-accent btn-next" onclick="goToStep(${idx+1})">Siguiente paso →</button>`
-      :`<button class="btn-accent btn-next" onclick="finishRetro()">Finalizar retro ✓</button>`}
-  </div>`;
+  if(step.id==='explora'){
+    html+=`<div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>
+      <button class="btn-accent btn-next" id="btn-open-vote" onclick="openInsightVoting()" disabled>Abrir votación de insights →</button>
+    </div>`;
+  } else if(step.id==='acciones'){
+    html+=`<div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>
+      <button class="btn-accent btn-next" onclick="openAccionVoting()">Abrir votación de acciones →</button>
+    </div>`;
+  } else {
+    html+=`<div class="btn-row" style="margin-top:1.5rem">
+      ${idx>0?`<button class="btn-secondary" onclick="goToStep(${idx-1})">← Anterior</button>`:''}
+      ${!isLast
+        ?`<button class="btn-accent btn-next" onclick="goToStep(${idx+1})">Siguiente paso →</button>`
+        :`<button class="btn-accent btn-next" onclick="finishRetro()">Finalizar retro ✓</button>`}
+    </div>`;
+  }
 
   content.innerHTML=html;
 
@@ -811,28 +869,30 @@ function renderFacilitatorStep(idx){
   const panel=document.getElementById('panel-instructions');
   if(panel) panel.textContent=instructions[step.id]||'';
 
-  listenIdeas(step.id,step.maxVotes);
+  if(step.id==='voto-insights'){
+    listenVoteResults('explora','vote-results-board');
+  } else if(step.id==='voto-acciones'){
+    listenVoteResults('acciones','vote-results-board');
+  } else if(step.id==='explora'){
+    listenIdeas(step.id, true);  // selectable
+  } else {
+    listenIdeas(step.id, false);
+  }
   startTimer();
 }
 
-function updateSprintField(field,value){
-  if(sprintData.current) sprintData.current[field]=value;
-  retroData.sprintData=sprintData;
-  // Sync to Firebase so participants see live edits
-  db.ref(sessionKey+'/sprintData/current/'+field).set(value);
-}
-
-function listenIdeas(stepId,maxVotes){
-  db.ref(sessionKey+'/ideas/'+stepId).on('value',snap=>{
+function listenVoteResults(stepId, boardId){
+  db.ref(sessionKey+'/ideas/'+stepId).on('value', snap=>{
     const ideas=snap.val()||{};
-    const board=document.getElementById('ideas-board');
+    const board=document.getElementById(boardId);
     if(!board) return;
-    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v})).sort((a,b)=>(b.votes||0)-(a.votes||0));
-    const count=document.getElementById('idea-count');
-    if(count) count.textContent=list.length?`(${list.length})`:'';
-    if(!list.length){board.innerHTML='<div class="empty-board">Esperando aportes del equipo...</div>';return;}
+    const list=Object.entries(ideas)
+      .map(([k,v])=>({id:k,...v}))
+      .filter(i=>i.votes>0||(stepId==='acciones'))
+      .sort((a,b)=>(b.votes||0)-(a.votes||0));
+    if(!list.length){board.innerHTML='<div class="empty-board">Esperando votos...</div>';return;}
     const topVotes=list[0].votes||0;
-    board.innerHTML=list.map(idea=>`
+    board.innerHTML=list.map((idea,i)=>`
       <div class="idea-card ${idea.votes===topVotes&&topVotes>0?'top-voted':''}">
         <div style="flex:1">
           ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
@@ -844,6 +904,92 @@ function listenIdeas(stepId,maxVotes){
     if(!retroData.steps) retroData.steps={};
     retroData.steps[stepId]=list;
   });
+}
+
+function updateSprintField(field,value){
+  if(sprintData.current) sprintData.current[field]=value;
+  retroData.sprintData=sprintData;
+  // Sync to Firebase so participants see live edits
+  db.ref(sessionKey+'/sprintData/current/'+field).set(value);
+}
+
+function listenIdeas(stepId, selectable){
+  db.ref(sessionKey+'/ideas/'+stepId).on('value',snap=>{
+    const ideas=snap.val()||{};
+    const board=document.getElementById('ideas-board');
+    if(!board) return;
+    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v})).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    const count=document.getElementById('idea-count');
+    if(count) count.textContent=list.length?`(${list.length})`:'';
+    if(!list.length){board.innerHTML='<div class="empty-board">Esperando aportes del equipo...</div>';return;}
+    if(!retroData.steps) retroData.steps={};
+    retroData.steps[stepId]=list;
+    if(selectable){
+      // Facilitator selects which insights go to vote
+      board.innerHTML=list.map(idea=>`
+        <div class="idea-card selectable ${(window._selectedInsights||{})[idea.id]?'selected-insight':''}"
+             id="icard-${idea.id}"
+             onclick="toggleSelectInsight('${stepId}','${idea.id}')">
+          <div style="flex:1">
+            ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
+            <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+          </div>
+          <div style="font-size:18px;line-height:1;flex-shrink:0">${(window._selectedInsights||{})[idea.id]?'✅':'○'}</div>
+        </div>`).join('');
+      updateSelectionCount();
+    } else {
+      board.innerHTML=list.map(idea=>`
+        <div class="idea-card">
+          <div style="flex:1">
+            ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:3px;line-height:1.3">${escapeHtml(idea.question)}</div>`:''}
+            <div class="idea-text">${escapeHtml(idea.shortText||idea.text)}</div>
+            ${idea.owner?`<div style="font-size:11px;color:var(--accent);margin-top:3px">👤 ${escapeHtml(idea.owner)}</div>`:''}
+          </div>
+          ${idea.votes>0?`<div class="vote-btn">👍 ${idea.votes}</div>`:''}
+        </div>`).join('');
+    }
+  });
+}
+
+function toggleSelectInsight(stepId, ideaId){
+  if(!window._selectedInsights) window._selectedInsights={};
+  if(window._selectedInsights[ideaId]) delete window._selectedInsights[ideaId];
+  else window._selectedInsights[ideaId]=true;
+  // Re-render card
+  db.ref(sessionKey+'/ideas/'+stepId+'/'+ideaId).once('value', snap=>{
+    const idea={id:ideaId,...snap.val()};
+    const card=document.getElementById('icard-'+ideaId);
+    if(card){
+      const selected=!!(window._selectedInsights||{})[ideaId];
+      card.classList.toggle('selected-insight', selected);
+      card.querySelector('div:last-child').textContent=selected?'✅':'○';
+    }
+    updateSelectionCount();
+  });
+}
+
+function updateSelectionCount(){
+  const n=Object.keys(window._selectedInsights||{}).length;
+  const btn=document.getElementById('btn-open-vote');
+  const lbl=document.getElementById('selection-count');
+  if(lbl) lbl.textContent=n>0?`${n} seleccionado${n!==1?'s':''}` :'Ninguno seleccionado';
+  if(btn) btn.disabled=n===0;
+}
+
+function openInsightVoting(){
+  const selected=window._selectedInsights||{};
+  const ids=Object.keys(selected);
+  if(!ids.length) return;
+  // Store as object map to avoid Firebase array conversion issues
+  const idsMap={};
+  ids.forEach((id,i)=>idsMap[i]=id);
+  db.ref(sessionKey+'/votoInsights').set({ids:idsMap, open:true});
+  goToStep(STEPS.findIndex(s=>s.id==='voto-insights'));
+}
+
+function openAccionVoting(){
+  db.ref(sessionKey+'/votoAcciones').set({open:true});
+  goToStep(STEPS.findIndex(s=>s.id==='voto-acciones'));
 }
 
 // ── FINISH & SUMMARY ──────────────────────────
@@ -883,7 +1029,11 @@ function renderSummary(record){
       ideas.slice(0,5).forEach((idea,i)=>{
         html+=`<div class="action-item-row ${i===0&&idea.votes>0?'top-voted':''}">
           <div class="action-rank">${idea.votes||0}👍</div>
-          <div class="action-text">${escapeHtml(idea.text)}</div>
+          <div style="flex:1">
+            ${idea.question?`<div style="font-size:10px;color:var(--accent);margin-bottom:2px">${escapeHtml(idea.question)}</div>`:''}
+            <div class="action-text">${escapeHtml(idea.shortText||idea.text)}</div>
+            ${idea.owner?`<div style="font-size:11px;color:var(--muted);margin-top:2px">👤 ${escapeHtml(idea.owner)}</div>`:''}
+          </div>
         </div>`;
       });
       html+=`</div>`;
@@ -995,10 +1145,14 @@ function setupParticipant(sk,apiKey,dbUrl){
 function listenPhaseForParticipant(){
   db.ref(sessionKey+'/phase').on('value',snap=>{
     const phase=snap.val();
-    if(!phase) renderParticipantVoting();
-    else if(phase.name==='retro') renderParticipantStep(phase.step,phase.topic);
-    else if(phase.name==='finished') renderParticipantFinished();
-    else renderParticipantVoting();
+    if(!phase){renderParticipantVoting();return;}
+    if(phase.name==='finished'){renderParticipantFinished();return;}
+    if(phase.name!=='retro'){renderParticipantVoting();return;}
+    const step=STEPS[phase.step];
+    if(!step) return;
+    if(step.id==='voto-insights') renderParticipantVoteInsights(phase.topic);
+    else if(step.id==='voto-acciones') renderParticipantVoteAcciones();
+    else renderParticipantStep(phase.step, phase.topic);
   });
 }
 
@@ -1077,12 +1231,8 @@ function renderParticipantStep(stepIdx,topicId){
     pExploraQuestionIdx=0;
     renderExploraWizard(topicId);
 
-  } else if(stepIdx===3){
-    // INSIGHTS — explicación + top exploración + papelitos + votación
-    renderInsightsStep(topicId);
-
   } else {
-    // ACCIONES
+    // ACCIONES (step 3)
     renderAccionesStep();
   }
 }
@@ -1124,16 +1274,11 @@ function renderAccionesStep(){
       <button class="btn-vote" onclick="submitAccion()">Agregar acción →</button>
     </div>
 
-    <!-- Votación -->
-    <div style="border-top:1px solid var(--border);padding-top:1.25rem">
-      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Votá las acciones del equipo</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Las más votadas serán los compromisos del sprint.</div>
-      <div class="votes-left" id="p-votes-left"></div>
-      <div id="p-ideas-vote-list"></div>
-    </div>`;
+    <!-- voting opens separately -->
+    `;
 
-  // Load top 3 insights
-  db.ref(sessionKey+'/ideas/insights').once('value', snap=>{
+  // Load top 3 from exploración (which now contains the insights)
+  db.ref(sessionKey+'/ideas/explora').once('value', snap=>{
     const ideas=snap.val()||{};
     const topDiv=document.getElementById('p-insights-top');
     if(!topDiv) return;
@@ -1149,13 +1294,13 @@ function renderAccionesStep(){
       <div style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;${i===0?'border:1px solid var(--accent)':'border:1px solid var(--border)'}">
         <div style="font-size:18px;line-height:1">${['🥇','🥈','🥉'][i]}</div>
         <div>
-          <div style="font-size:12px;line-height:1.5;color:var(--text)">${escapeHtml(idea.text)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px;line-height:1.3">${escapeHtml(idea.question||'')}</div>
+          <div style="font-size:12px;line-height:1.5;color:var(--text)">${escapeHtml(idea.shortText||idea.text)}</div>
           ${idea.votes?`<div style="font-size:11px;color:var(--accent);margin-top:3px">${idea.votes} voto${idea.votes!==1?'s':''}</div>`:''}
         </div>
       </div>`).join('');
   });
 
-  listenIdeasForVoting('acciones', STEPS.find(s=>s.id==='acciones').maxVotes);
 }
 
 function submitAccion(){
@@ -1181,134 +1326,46 @@ function submitAccion(){
   });
 }
 
-// INSIGHTS STEP
-function renderInsightsStep(topicId){
-  const content=document.getElementById('p-content');
-  const alreadySent=pIdeasSubmitted['insights']||[];
 
-  content.innerHTML=`
-    <div style="margin-bottom:1.25rem">
-      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Insights</div>
-      <div class="p-step-title">¿Qué aprendimos?</div>
-    </div>
 
-    <!-- Explicación de insight -->
-    <div style="background:var(--surface2);border-left:3px solid var(--accent);border-radius:var(--radius);padding:12px 14px;margin-bottom:1.25rem">
-      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">¿Qué es un insight?</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6">
-        Un insight es una comprensión profunda que emerge de la experiencia del sprint.
-        No es solo "qué pasó", sino <em style="color:var(--text)">por qué pasó y qué significa para el equipo</em>.
-        Un buen insight conecta un patrón con una causa raíz.
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        Ejemplos: <em>"Cuando no refinamos bien, el carry over sube"</em> · <em>"Los bloqueos aparecen siempre al final del sprint, no al inicio"</em>
-      </div>
-    </div>
-
-    <!-- Top exploración -->
-    <div style="margin-bottom:1.25rem">
-      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Lo más votado en exploración</div>
-      <div id="p-explora-top"><div style="font-size:12px;color:var(--muted)">Cargando...</div></div>
-    </div>
-
-    <!-- Papelito propio -->
-    <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-bottom:1.25rem">
-      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Sumá tu insight</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">¿Qué aprendizaje o patrón ves vos en lo que exploró el equipo?</div>
-      ${alreadySent.length?`<div class="ideas-sent" id="insights-sent">${alreadySent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('')}</div>`:'<div class="ideas-sent" id="insights-sent" style="display:none"></div>'}
-      <textarea class="p-textarea" id="p-idea-input" placeholder="Ej: Siempre que tenemos dependencias no mapeadas, el carry over sube..."></textarea>
-      <button class="btn-vote" onclick="submitInsight()">Agregar papelito →</button>
-    </div>
-
-    <!-- Votación -->
-    <div style="border-top:1px solid var(--border);padding-top:1.25rem">
-      <div style="font-size:13px;font-weight:600;margin-bottom:.25rem">Votá los insights del equipo</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Elegí los que más resuenan con tu experiencia del sprint.</div>
-      <div class="votes-left" id="p-votes-left"></div>
-      <div id="p-ideas-vote-list"></div>
-    </div>`;
-
-  // Load top 5 from exploración
-  db.ref(sessionKey+'/ideas/explora').once('value', snap=>{
-    const ideas=snap.val()||{};
-    const topDiv=document.getElementById('p-explora-top');
-    if(!topDiv) return;
-    const list=Object.entries(ideas)
-      .map(([k,v])=>({id:k,...v}))
-      .sort((a,b)=>(b.votes||0)-(a.votes||0))
-      .slice(0,5);
-    if(!list.length){
-      topDiv.innerHTML='<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas votadas en exploración.</div>';
-      return;
-    }
-    topDiv.innerHTML=list.map(idea=>`
-      <div style="background:var(--surface2);border-radius:var(--radius);padding:9px 12px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start">
-        <div style="color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap;min-width:28px">${idea.votes||0}👍</div>
-        <div style="font-size:12px;line-height:1.5;color:var(--text)">${escapeHtml(idea.shortText||idea.text)}</div>
-      </div>`).join('');
-  });
-
-  listenIdeasForVoting('insights', STEPS.find(s=>s.id==='insights').maxVotes);
-}
-
-function submitInsight(){
-  const input=document.getElementById('p-idea-input');
-  const text=input?input.value.trim():'';
-  if(!text) return;
-  db.ref(sessionKey+'/ideas/insights').push({text,votes:0,submittedBy:participantId,ts:Date.now()}).then(()=>{
-    if(!pIdeasSubmitted['insights']) pIdeasSubmitted['insights']=[];
-    pIdeasSubmitted['insights'].push(text);
-    if(input) input.value='';
-    const sentDiv=document.getElementById('insights-sent');
-    if(sentDiv){
-      sentDiv.style.display='flex';
-      sentDiv.style.flexDirection='column';
-      sentDiv.style.gap='6px';
-      sentDiv.style.marginBottom='1rem';
-      sentDiv.innerHTML=pIdeasSubmitted['insights'].map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
-    }
-  });
-}
-
-// EXPLORATION WIZARD — one question at a time
+// EXPLORATION+INSIGHTS WIZARD — 3 insight questions + 1 open optional
 function renderExploraWizard(topicId){
   const topic=TOPICS.find(t=>t.id===topicId);
-  const questions=TOPIC_QUESTIONS[topicId]||[];
-  const total=questions.length;
+  const baseQuestions=TOPIC_QUESTIONS[topicId]||[];
+  const allQuestions=[...baseQuestions, OPEN_QUESTION];  // 4 total, last is open/optional
+  const total=allQuestions.length;
   const idx=pExploraQuestionIdx;
   const stepId='explora';
-  const content=document.getElementById('p-content');
+  const pcontent=document.getElementById('p-content');
+  const isOpenQuestion=idx===total-1;  // last question is the open one
 
   if(idx>=total){
-    // All questions answered — show summary + voting
+    // All done — show summary + voting
     const answered=pIdeasSubmitted[stepId]||[];
-    content.innerHTML=`
+    pcontent.innerHTML=`
       <div style="margin-bottom:1.25rem">
-        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Exploración</div>
-        <div class="p-step-title">¡Listo! Tus respuestas</div>
-        <div class="p-step-sub">Ya enviaste tus reflexiones. Ahora podés votar las ideas del resto del equipo.</div>
+        <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">${topic?topic.icon+' '+topic.name:''} · Exploración</div>
+        <div class="p-step-title">Tus insights</div>
+        <div class="p-step-sub">Tus respuestas ya están en el tablero. Ahora votá las que más resuenen del equipo.</div>
       </div>
-      <div class="ideas-sent">${answered.map((t,i)=>`
+      <div class="ideas-sent" style="margin-bottom:1.25rem">${answered.map((t,i)=>`
         <div class="idea-sent">
-          <div style="font-size:10px;color:var(--accent);margin-bottom:2px">${questions[i]||''}</div>
+          <div style="font-size:10px;color:var(--accent);margin-bottom:2px;line-height:1.3">${escapeHtml(allQuestions[i]||'')}</div>
           ${escapeHtml(t)}
         </div>`).join('')}
       </div>
-      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
-        <div style="font-size:13px;font-weight:600;margin-bottom:.5rem">Votá las ideas del equipo</div>
-        <div class="votes-left" id="p-votes-left"></div>
-        <div id="p-ideas-vote-list"></div>
+      <div style="margin-top:1rem;background:var(--surface2);border-radius:var(--radius);padding:12px 14px;text-align:center">
+        <div style="font-size:13px;color:var(--muted)"><span class="pulse-dot"></span>Esperá — el facilitador va a abrir la votación en breve.</div>
       </div>`;
-    listenIdeasForVoting(stepId, STEPS.find(s=>s.id===stepId).maxVotes);
     return;
   }
 
-  const question=questions[idx];
+  const question=allQuestions[idx];
   const isLast=idx===total-1;
 
-  content.innerHTML=`
+  pcontent.innerHTML=`
     <div style="margin-bottom:1.5rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
         <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase">
           ${topic?topic.icon+' '+topic.name:'Exploración'}
         </div>
@@ -1317,39 +1374,76 @@ function renderExploraWizard(topicId){
         </div>
       </div>
       <div style="display:flex;gap:4px;margin-bottom:1.25rem">
-        ${questions.map((_,i)=>`<div style="flex:1;height:3px;border-radius:2px;background:${i<=idx?'var(--accent)':'var(--border)'}"></div>`).join('')}
+        ${allQuestions.map((_,i)=>`<div style="flex:1;height:3px;border-radius:2px;background:${i<idx?'var(--accent)':i===idx?'var(--accent-dim)':'var(--border)'}"></div>`).join('')}
       </div>
-      <div class="p-step-title" style="font-size:17px;line-height:1.4;margin-bottom:1.5rem">${escapeHtml(question)}</div>
+      ${isOpenQuestion?`<div style="font-size:11px;background:var(--surface2);border-radius:999px;padding:3px 10px;color:var(--muted);display:inline-block;margin-bottom:.75rem">Opcional</div>`:''}
+      <div class="p-step-title" style="font-size:16px;line-height:1.5;margin-bottom:${isOpenQuestion?'.5rem':'1.25rem'}">${escapeHtml(question)}</div>
+      ${isOpenQuestion?`<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Si no tenés nada para agregar, podés saltear esta.</div>`:''}
     </div>
-    <textarea class="p-textarea" id="p-explora-input" placeholder="Escribí tu reflexión..." style="min-height:110px"></textarea>
-    <button class="btn-vote" id="p-explora-btn" onclick="submitExploraAnswer('${topicId}',${idx},${total})">
-      ${isLast ? 'Enviar y ver resultados ✓' : 'Enviar y seguir →'}
-    </button>
-    ${idx>0?`<button onclick="pExploraQuestionIdx--;renderExploraWizard('${topicId}')" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);padding:10px;font-size:13px;cursor:pointer;">← Anterior</button>`:''}`;
+    <div id="open-sent-list" style="display:none;flex-direction:column;gap:6px;margin-bottom:1rem"></div>
+    <textarea class="p-textarea" id="p-explora-input" placeholder="${isOpenQuestion?'Escribí una observación...(podés agregar varias)':'Escribí tu insight...'}" style="min-height:100px"></textarea>
+    ${isOpenQuestion?`
+      <button class="btn-vote" id="p-explora-btn" onclick="submitExploraAnswer('${topicId}',${idx},${total},true)">
+        + Agregar observación
+      </button>
+      <button onclick="skipOpenQuestion(${total})" style="width:100%;margin-top:8px;background:var(--accent);border:none;color:#0e0f11;font-weight:700;border-radius:var(--radius);padding:12px;font-size:14px;cursor:pointer;">
+        Listo, no tengo más ✓
+      </button>
+    `:`
+      <button class="btn-vote" id="p-explora-btn" onclick="submitExploraAnswer('${topicId}',${idx},${total},false)">
+        Enviar y seguir →
+      </button>
+    `}
+    ${idx>0&&!isOpenQuestion?`<button onclick="pExploraQuestionIdx--;renderExploraWizard('${topicId}')" style="width:100%;margin-top:8px;background:transparent;border:none;color:var(--muted);padding:8px;font-size:12px;cursor:pointer;text-decoration:underline">← Anterior</button>`:''}`;
 }
 
-function submitExploraAnswer(topicId,idx,total){
+function skipOpenQuestion(total){
+  // Jump to summary without submitting the open question
+  pExploraQuestionIdx=total;
+  const topicId=pCurrentTopic;
+  renderExploraWizard(topicId);
+}
+
+function submitExploraAnswer(topicId,idx,total,stayOnPage){
   const input=document.getElementById('p-explora-input');
   const text=input?input.value.trim():'';
-  if(!text) return;
+  const allQuestions=[...(TOPIC_QUESTIONS[topicId]||[]), OPEN_QUESTION];
+  if(!text){
+    // Empty on non-open question — don't advance
+    if(!stayOnPage){ pExploraQuestionIdx=idx+1; renderExploraWizard(topicId); }
+    return;
+  }
   const btn=document.getElementById('p-explora-btn');
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-  // Tag the idea with the question so facilitator sees context
-  const questions=TOPIC_QUESTIONS[topicId]||[];
-  const label=`[${questions[idx]}] ${text}`;
   db.ref(sessionKey+'/ideas/explora').push({
-    text: label,
+    text,
     shortText: text,
-    question: questions[idx],
+    question: allQuestions[idx]||'',
     questionIdx: idx,
+    isOpen: idx===total-1,
     votes:0,
     submittedBy:participantId,
     ts:Date.now()
   }).then(()=>{
     if(!pIdeasSubmitted['explora']) pIdeasSubmitted['explora']=[];
     pIdeasSubmitted['explora'].push(text);
-    pExploraQuestionIdx=idx+1;
-    renderExploraWizard(topicId);
+    if(stayOnPage){
+      // Open question — stay, clear input, show sent item
+      if(input) input.value='';
+      if(btn){btn.disabled=false;btn.textContent='+ Agregar observación';}
+      const sentList=document.getElementById('open-sent-list');
+      if(sentList){
+        sentList.style.display='flex';
+        sentList.style.flexDirection='column';
+        sentList.style.gap='6px';
+        sentList.style.marginBottom='1rem';
+        const openSent=(pIdeasSubmitted['explora']||[]).slice(3);
+        sentList.innerHTML=openSent.map(t=>`<div class="idea-sent">✓ ${escapeHtml(t)}</div>`).join('');
+      }
+    } else {
+      pExploraQuestionIdx=idx+1;
+      renderExploraWizard(topicId);
+    }
   });
 }
 
@@ -1408,45 +1502,131 @@ function submitIdea(stepId){
   });
 }
 
-function listenIdeasForVoting(stepId,maxVotes){
-  db.ref(sessionKey+'/ideas/'+stepId).on('value',snap=>{
-    const ideas=snap.val()||{};
-    const list=Object.entries(ideas).map(([k,v])=>({id:k,...v}))
-      .filter(i=>i.submittedBy!==participantId)
-      .sort((a,b)=>(b.votes||0)-(a.votes||0));
-    const myVotes=pVotedIdeas[stepId]||{};
-    const usedVotes=Object.keys(myVotes).length;
-    const remaining=maxVotes-usedVotes;
-    const votesLeftEl=document.getElementById('p-votes-left');
-    if(votesLeftEl) votesLeftEl.innerHTML=`Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx. ${maxVotes})`;
-    const voteList=document.getElementById('p-ideas-vote-list');
-    if(!voteList) return;
-    if(!list.length){voteList.innerHTML='<div style="font-size:12px;color:var(--muted)">Todavía no hay ideas de otros participantes.</div>';return;}
-    voteList.innerHTML=list.map(idea=>{
-      const isVoted=!!myVotes[idea.id];
-      return `<div class="vote-idea-card ${isVoted?'voted':''}" onclick="toggleIdeaVote('${stepId}','${idea.id}',${maxVotes})">
-        <div class="vi-text">${escapeHtml(idea.shortText||idea.text)}</div>
-        <div class="vi-foot"><span class="vi-check"></span>
-          <span>${isVoted?'Votado · ':''}${idea.votes||0} voto${(idea.votes||0)!==1?'s':''}</span>
-          ${!isVoted&&remaining<=0?'<span style="color:var(--muted)">Sin votos disponibles</span>':''}
-        </div></div>`;
-    }).join('');
+
+
+// PARTICIPANT: DEDICATED VOTING PAGE — INSIGHTS
+function renderParticipantVoteInsights(topicId){
+  const pcontent=document.getElementById('p-content');
+  const topic=TOPICS.find(t=>t.id===topicId);
+
+  pcontent.innerHTML=`
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">${topic?topic.icon+' '+topic.name:''}</div>
+      <div class="p-step-title">Votá los insights</div>
+      <div class="p-step-sub">El facilitador seleccionó estos insights. Votá los que más te representan.</div>
+    </div>
+    <div class="votes-remaining" id="vi-votes-left">Cargando...</div>
+    <div id="vi-cards">
+      <div style="font-size:13px;color:var(--muted);text-align:center;padding:2rem 0"><span class="pulse-dot"></span>Cargando insights...</div>
+    </div>`;
+
+  // Get selected insight IDs from facilitator
+  db.ref(sessionKey+'/votoInsights').on('value', snap=>{
+    const voto=snap.val()||{};
+    // Firebase may store array as object {0: id1, 1: id2} — normalize to array
+    const rawIds=voto.ids||{};
+    const selectedIds=Array.isArray(rawIds)?rawIds:Object.values(rawIds);
+    if(!selectedIds.length){
+      const el=document.getElementById('vi-cards');
+      if(el) el.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:2rem 0"><span class="pulse-dot"></span>El facilitador todavía no seleccionó insights.</div>';
+      return;
+    }
+    // Load all explora ideas and filter to selected
+    db.ref(sessionKey+'/ideas/explora').on('value', snap2=>{
+      const all=snap2.val()||{};
+      const ideas=selectedIds
+        .map(id=>all[id]?{id,...all[id]}:null)
+        .filter(Boolean);
+      if(!ideas.length){
+        const el=document.getElementById('vi-cards');
+        if(el) el.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:2rem 0">No se encontraron los insights seleccionados.</div>';
+        return;
+      }
+      renderVoteCards('vi-cards','vi-votes-left', ideas, 'explora', 3);
+    });
   });
 }
 
-function toggleIdeaVote(stepId,ideaId,maxVotes){
+// PARTICIPANT: DEDICATED VOTING PAGE — ACCIONES
+function renderParticipantVoteAcciones(){
+  const pcontent=document.getElementById('p-content');
+
+  pcontent.innerHTML=`
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem">Acciones</div>
+      <div class="p-step-title">Votá las acciones</div>
+      <div class="p-step-sub">Elegí las acciones que creés que más impacto tendrían en el próximo sprint.</div>
+    </div>
+    <div class="votes-remaining" id="va-votes-left">Cargando...</div>
+    <div id="va-cards">
+      <div style="font-size:13px;color:var(--muted);text-align:center;padding:2rem 0"><span class="pulse-dot"></span>Cargando acciones...</div>
+    </div>`;
+
+  db.ref(sessionKey+'/ideas/acciones').on('value', snap=>{
+    const all=snap.val()||{};
+    const ideas=Object.entries(all).map(([k,v])=>({id:k,...v}));
+    if(!ideas.length){
+      document.getElementById('va-cards').innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:2rem 0">Todavía no hay acciones propuestas.</div>';
+      return;
+    }
+    renderVoteCards('va-cards','va-votes-left', ideas, 'acciones', 2);
+  });
+}
+
+// Shared vote cards renderer
+function renderVoteCards(cardsDivId, votesLabelId, ideas, stepId, maxVotes){
   const myVotes=pVotedIdeas[stepId]||{};
-  const isVoted=!!myVotes[ideaId];  // always read from state, never from HTML string
+  const used=Object.keys(myVotes).length;
+  const remaining=maxVotes-used;
+
+  const votesEl=document.getElementById(votesLabelId);
+  if(votesEl) votesEl.innerHTML=`Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx ${maxVotes})`;
+
+  const cardsEl=document.getElementById(cardsDivId);
+  if(!cardsEl) return;
+
+  cardsEl.innerHTML=ideas.map(idea=>{
+    const isVoted=!!myVotes[idea.id];
+    return `<div class="vote-insight-card ${isVoted?'voted':''}" id="vc-${idea.id}" onclick="castVote('${stepId}','${idea.id}',${maxVotes},'${cardsDivId}','${votesLabelId}')">
+      ${idea.question?`<div class="vic-question">${escapeHtml(idea.question)}</div>`:''}
+      <div class="vic-text">${escapeHtml(idea.shortText||idea.text)}</div>
+      ${idea.owner?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px">👤 ${escapeHtml(idea.owner)}</div>`:''}
+      <div class="vic-foot">
+        <div class="vote-check"></div>
+        <span>${isVoted?'<strong style="color:var(--accent)">Votado</strong>':'Votar'}</span>
+        <span style="margin-left:auto">${idea.votes||0} voto${(idea.votes||0)!==1?'s':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function castVote(stepId, ideaId, maxVotes, cardsDivId, votesLabelId){
+  if(!pVotedIdeas[stepId]) pVotedIdeas[stepId]={};
+  const myVotes=pVotedIdeas[stepId];
+  const isVoted=!!myVotes[ideaId];
   if(isVoted){
     delete myVotes[ideaId];
-    pVotedIdeas[stepId]=myVotes;
     db.ref(sessionKey+'/ideas/'+stepId+'/'+ideaId+'/votes').transaction(v=>Math.max(0,(v||0)-1));
-  }else{
+  } else {
     if(Object.keys(myVotes).length>=maxVotes) return;
     myVotes[ideaId]=true;
-    pVotedIdeas[stepId]=myVotes;
     db.ref(sessionKey+'/ideas/'+stepId+'/'+ideaId+'/votes').transaction(v=>(v||0)+1);
   }
+  // Update just this card visually without full re-render
+  const card=document.getElementById('vc-'+ideaId);
+  if(card){
+    const nowVoted=!!myVotes[ideaId];
+    card.classList.toggle('voted', nowVoted);
+    const foot=card.querySelector('.vic-foot span:first-of-type');
+    if(foot) foot.innerHTML=nowVoted?'<strong style="color:var(--accent)">Votado</strong>':'Votar';
+    const chk=card.querySelector('.vote-check');
+    if(chk) chk.style.background=nowVoted?'var(--accent)':'';
+  }
+  // Update votes remaining label
+  const used=Object.keys(myVotes).length;
+  const remaining=maxVotes-used;
+  const votesEl=document.getElementById(votesLabelId);
+  if(votesEl) votesEl.innerHTML=`Tenés <strong>${remaining}</strong> voto${remaining!==1?'s':''} disponible${remaining!==1?'s':''} (máx ${maxVotes})`;
 }
 
 function renderParticipantWaiting(title,msg){
