@@ -255,6 +255,7 @@ input:focus{border-color:var(--accent);}
       <div class="grid-2">
         <div class="field-group"><label>Velocity comprometida</label><input type="number" id="s0-vel-est" placeholder="0" /></div>
         <div class="field-group"><label>Velocity promedio (real)</label><input type="number" id="s0-vel" placeholder="0" /></div>
+        <div class="field-group"><label>Puntos finalizados</label><input type="number" id="s0-pts" placeholder="0" /></div>
         <div class="field-group"><label>Carry over (items)</label><input type="number" id="s0-carry" placeholder="0" /></div>
         <div class="field-group"><label>Lead time (días)</label><input type="number" id="s0-leadtime" placeholder="0" step="0.1" /></div>
         <div class="field-group"><label>Cantidad de errores</label><input type="number" id="s0-bugs" placeholder="0" /></div>
@@ -443,6 +444,7 @@ const TOPICS=[
   {id:'energia',  name:'Energía del equipo', desc:'Motivación, clima, comunicación',     icon:'⚡'},
   {id:'deuda',    name:'Deuda técnica',      desc:'Refactors pendientes, arquitectura',  icon:'🔧'},
   {id:'discovery',name:'Discovery',          desc:'Ideas, experimentos, backlog',        icon:'💡'},
+  {id:'general',  name:'General',            desc:'Qué salió bien y qué mejorar',         icon:'🔁'},
 ];
 const STEPS=[
   {id:'checkin',      name:'Check-in',       mins:3 },
@@ -503,6 +505,11 @@ const TOPIC_QUESTIONS={
     '¿Qué hipótesis del equipo este sprint resultó ser una suposición sin validar — y qué costo tuvo eso?',
     '¿Qué cambiaría en cómo priorizamos si tuviéramos más evidencia de usuarios y menos intuición?',
   ],
+  general:[
+    '¿Qué cosa concreta del sprint te generó orgullo o satisfacción — y qué dice eso del equipo?',
+    '¿Qué aspecto del sprint, si lo mejoraras, tendría más impacto en cómo trabaja el equipo?',
+    '¿Qué patrón ves cuando mirás el sprint completo — algo que se repite para bien o para mal?',
+  ],
 };
 // Open-ended question appended to all topics
 const OPEN_QUESTION='¿Hay algo más que querés dejar dicho sobre este sprint — algo que no entraba en las preguntas anteriores?';
@@ -525,7 +532,8 @@ function initApp(){
     current:{
       name:        sprintName,
       velEst:      v('s0-vel-est'),  vel:        v('s0-vel'),
-      carry:       v('s0-carry'),    leadtime:   v('s0-leadtime'),
+      pts:         v('s0-pts'),      carry:      v('s0-carry'),
+      leadtime:    v('s0-leadtime'),
       bugs:        v('s0-bugs'),     incidents:  v('s0-incidents'),
       qa:          v('s0-qa'),       efectividad:v('s0-efectividad'),
     },
@@ -769,6 +777,7 @@ function renderFacilitatorStep(idx){
       <div class="sprint-data-grid">
         <div class="sprint-data-cell"><div class="sdc-label">Vel. comprometida</div><input type="number" id="ed-vel-est" value="${sd.velEst||''}" placeholder="—" onchange="updateSprintField('velEst',this.value)"/><div class="sdc-note">puntos planeados</div></div>
         <div class="sprint-data-cell"><div class="sdc-label">Vel. promedio real</div><input type="number" id="ed-vel" value="${sd.vel||''}" placeholder="—" onchange="updateSprintField('vel',this.value)"/><div class="sdc-note">puntos completados</div></div>
+        <div class="sprint-data-cell"><div class="sdc-label">Puntos finalizados</div><input type="number" id="ed-pts" value="${sd.pts||''}" placeholder="—" onchange="updateSprintField('pts',this.value)"/><div class="sdc-note">total cerrado</div></div>
         <div class="sprint-data-cell"><div class="sdc-label">Carry over</div><input type="number" id="ed-carry" value="${sd.carry||''}" placeholder="—" onchange="updateSprintField('carry',this.value)"/><div class="sdc-note">items no cerrados</div></div>
         <div class="sprint-data-cell"><div class="sdc-label">Lead time</div><input type="number" id="ed-leadtime" value="${sd.leadtime||''}" placeholder="—" onchange="updateSprintField('leadtime',this.value)"/><div class="sdc-note">días promedio</div></div>
         <div class="sprint-data-cell"><div class="sdc-label">Cantidad de errores</div><input type="number" id="ed-bugs" value="${sd.bugs||''}" placeholder="—" onchange="updateSprintField('bugs',this.value)"/><div class="sdc-note">indicador de calidad</div></div>
@@ -1110,6 +1119,7 @@ function renderSummary(record){
       <div style="display:flex;gap:1rem;flex-wrap:wrap">
         ${sd.velEst!=='—'?`<span style="font-size:13px">Vel.comp. <strong>${sd.velEst}</strong></span>`:''}
         ${sd.vel!=='—'?`<span style="font-size:13px">Vel.real <strong>${sd.vel}</strong></span>`:''}
+        ${sd.pts!=='—'?`<span style="font-size:13px">Pts. finalizados <strong>${sd.pts}</strong></span>`:''}
         ${sd.carry!=='—'?`<span style="font-size:13px">Carry over <strong>${sd.carry}</strong></span>`:''}
         ${sd.leadtime!=='—'?`<span style="font-size:13px">Lead time <strong>${sd.leadtime}d</strong></span>`:''}
         ${sd.bugs!=='—'?`<span style="font-size:13px">Errores <strong>${sd.bugs}</strong></span>`:''}
@@ -1553,7 +1563,8 @@ function listenSprintDataForParticipant(){
     const cur=sd.current||{};
     const fields=[
       {label:'Vel. comprometida', val:cur.velEst,      note:'puntos planeados'},
-      {label:'Vel. promedio real',val:cur.vel,         note:'puntos completados'},
+      {label:'Vel. promedio real', val:cur.vel,         note:'puntos completados'},
+      {label:'Puntos finalizados', val:cur.pts,         note:'total cerrado'},
       {label:'Carry over',        val:cur.carry,       note:'items no cerrados'},
       {label:'Lead time',         val:cur.leadtime,    note:'días promedio'},
       {label:'Cantidad errores',  val:cur.bugs,        note:'indicador de calidad'},
